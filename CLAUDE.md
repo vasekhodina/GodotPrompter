@@ -4,6 +4,8 @@
 
 GodotPrompter is an open-source agentic skills framework for Godot 4.x game development, supporting both GDScript and C#. It provides domain-specific skills that AI coding agents load on demand for Godot-specific guidance.
 
+This is a **documentation/skills repository** — no build, test, or lint commands. Changes are validated by reading skills, verifying code examples in Godot 4.3+, and running the agent integration tests in `tests/agent-integration/TEST_PLAN.md`.
+
 ## Supported Platforms
 
 - Claude Code (primary — tool names are canonical)
@@ -37,7 +39,7 @@ GodotPrompter is an open-source agentic skills framework for Godot 4.x game deve
 skills/                     # 44 domain-specific skill folders
   <skill-name>/
     SKILL.md                # Main skill document (YAML frontmatter required)
-    *.md                    # Optional supporting references
+    *.md                    # Optional supporting references (e.g. references/ subfolder in using-godot-prompter)
 agents/                     # 3 specialized agent definitions
   godot-game-architect.md   # System design and architecture planning
   godot-game-dev.md         # Feature implementation guided by skills
@@ -47,6 +49,7 @@ docs/superpowers/           # Design specs and implementation plans
   plans/                    # Phase implementation plans
   specs/                    # Design specification documents
 tests/agent-integration/    # Agent test plan and results
+AGENTS.md, GEMINI.md        # Root @-imports re-exporting using-godot-prompter for Codex/Gemini
 .claude-plugin/             # Claude Code plugin manifest
 .cursor-plugin/             # Cursor plugin manifest
 .codex/                     # Codex install instructions
@@ -88,7 +91,7 @@ model: inherit
 
 Current version: check `package.json` and `.claude-plugin/plugin.json` (must match).
 
-When releasing:
+When releasing (full command sequence in `CONTRIBUTING.md`):
 1. Update version in `.claude-plugin/plugin.json`, `package.json`, `CHANGELOG.md`
 2. Commit, tag (`v<version>`), push with tags
 3. Create GitHub release
