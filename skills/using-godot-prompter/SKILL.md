@@ -75,10 +75,11 @@ Each skill provides complete code examples, Godot best practices, and a checklis
 Load `godot-prompter:godot-code-review` to review the code against Godot-specific checklists.
 
 ### Agents
-GodotPrompter provides 3 specialized agents (use via the Agent tool):
+
 - **godot-game-architect** — Designs systems, plans scene trees, chooses patterns
 - **godot-game-dev** — Implements features guided by skills
 - **godot-code-reviewer** — Reviews code against Godot best practices
+- **godot-shader-author** — Authors custom shaders, post-processing, Compositor effects
 
 ### Plan Storage
 Implementation plans and design docs are saved to `docs/godot-prompter/plans/` and `docs/godot-prompter/specs/` in the user's project.
