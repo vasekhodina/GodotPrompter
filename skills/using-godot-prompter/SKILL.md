@@ -80,6 +80,7 @@ Load `godot-prompter:godot-code-review` to review the code against Godot-specifi
 - **godot-game-dev** — Implements features guided by skills
 - **godot-code-reviewer** — Reviews code against Godot best practices
 - **godot-shader-author** — Authors custom shaders, post-processing, Compositor effects
+- **godot-performance-profiler** — Diagnoses performance issues from profiler data
 
 ### Plan Storage
 Implementation plans and design docs are saved to `docs/godot-prompter/plans/` and `docs/godot-prompter/specs/` in the user's project.
