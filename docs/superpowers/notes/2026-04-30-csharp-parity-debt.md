@@ -4,7 +4,7 @@ The validator (added in v1.5.0) flags these GDScript-only sections. They are int
 
 ---
 
-## Deferred (count: 32)
+## Deferred (count: 33)
 
 These sections have GDScript code but no C# block. Each entry notes what kind of C# would belong so a future author can pick up any single item in isolation.
 
@@ -45,4 +45,4 @@ These sections have GDScript code but no C# block. Each entry notes what kind of
 
 ## Accepted (intentional GDScript-only — not debt)
 
-- `skills/gdscript-patterns/SKILL.md` — all sections (7 warnings) — this skill is GDScript-by-design and explicitly documents GDScript-specific language features (`@export`, `await`, `match`, `class_name`, lambdas, annotations). Adding C# to this skill would undermine its purpose. Documented in the skill itself with an intent note added in v1.5.0.
+- `skills/gdscript-patterns/SKILL.md` — all sections (9 warnings, sections 1-6, 8, 12, 13) — this skill is GDScript-by-design and explicitly documents GDScript-specific language features (`@export`, `await`, `match`, `class_name`, lambdas, annotations, `...args` variadic, `@abstract`). Adding C# to this skill would undermine its purpose. Documented in the skill itself with an intent note added in v1.5.0.

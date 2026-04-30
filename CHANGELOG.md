@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **godot-shader-author** agent — shader specialist for canvas_item / spatial / particles / sky / fog shaders, post-processing, and Compositor effects
 - **godot-performance-profiler** agent — profiler-driven bottleneck diagnosis with prescriptive fixes from godot-optimization
-- `scripts/validate-skills.mjs` — validates SKILL.md frontmatter, cross-references, GDScript/C# parity, and implementation checklists; 0 errors at release (41 C# parity warnings documented as deferred debt)
+- `scripts/validate-skills.mjs` — validates SKILL.md frontmatter, cross-references, GDScript/C# parity, and implementation checklists; 0 errors at release (42 C# parity warnings documented as deferred debt)
 - `scripts/bump-version.mjs` — bumps version across `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, and sibling marketplace repos
 - `.github/workflows/release.yml` — tag-triggered release workflow with marketplace PR automation
 - **gdscript-patterns** — added Variadic Functions and Abstract Classes (Godot 4.5+)
@@ -38,7 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **tween-animation** — added cross-references to math-essentials and particles-vfx
 - Cross-references audited across all 44 skills — added 21 reciprocal entries; standardized cross-reference formatting repo-wide
 
-> **Release notes:** Validator baseline at release: 0 errors, 41 warnings (all C# parity — documented in `docs/superpowers/notes/2026-04-30-csharp-parity-debt.md`). Repo-wide minimum stays at Godot 4.3+; new content for 4.5/4.6 is additive with explicit version annotations.
+> **Release notes:** Validator baseline at release: 0 errors, 42 warnings (all C# parity — documented in `docs/superpowers/notes/2026-04-30-csharp-parity-debt.md`). Repo-wide minimum stays at Godot 4.3+; new content for 4.5/4.6 is additive with explicit version annotations.
 
 ## [1.4.1] - 2026-04-09
 

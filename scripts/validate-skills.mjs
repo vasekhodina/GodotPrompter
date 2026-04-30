@@ -99,8 +99,16 @@ function validateSkill({ name, path }) {
     record(warnings, path, 'related-skills-line-missing', 'No "**Related skills:**" line found between H1 and first numbered section');
   }
 
-  // Warning: GDScript blocks without paired C# blocks in the same numbered section
-  const sections = body.split(/^##\s+/m).slice(1);
+  // Warning: GDScript blocks without paired C# blocks in the same numbered section.
+  // Mask `## ...` lines that occur INSIDE fenced code blocks (e.g., GDScript doc-comments)
+  // before splitting, so they aren't treated as section boundaries.
+  const lines = body.split('\n');
+  let inFence = false;
+  const masked = lines.map(line => {
+    if (/^```/.test(line)) inFence = !inFence;
+    return inFence && /^##\s+/.test(line) ? '__MASKED_FENCE_HEADER__' : line;
+  }).join('\n');
+  const sections = masked.split(/^##\s+/m).slice(1);
   for (const section of sections) {
     const hasGd = /```gdscript[\s\S]*?```/m.test(section);
     const hasCs = /```csharp[\s\S]*?```/m.test(section);

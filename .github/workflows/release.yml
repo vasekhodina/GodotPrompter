@@ -122,6 +122,7 @@ jobs:
 
       - name: Open PR against godot-prompter-marketplace
         if: steps.token-check.outputs.skip == 'false'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
           VERSION: ${{ github.ref_name }}
