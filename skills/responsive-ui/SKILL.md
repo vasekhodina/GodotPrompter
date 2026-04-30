@@ -7,7 +7,7 @@ description: Use when handling multiple resolutions — stretch modes, aspect ra
 
 All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, then C#.
 
-> **Related skills:** **godot-ui** for Control node layout and themes, **export-pipeline** for platform-specific export settings, **godot-project-setup** for initial project resolution settings.
+> **Related skills:** **godot-ui** for Control node layout and themes, **export-pipeline** for platform-specific export settings, **godot-project-setup** for initial project resolution settings, **input-handling** for touch vs desktop input adaptation, **localization** for layout adjustments per locale.
 
 ---
 
