@@ -46,9 +46,9 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${GITHUB_REF#refs/tags/v}"
-          # Extract the section between "## [VERSION]" and the next "## [" header
+          # Match "## [VERSION]" exactly (string compare avoids regex dot ambiguity)
           awk -v ver="$VERSION" '
-            $0 ~ "^## \\[" ver "\\]" { found=1; next }
+            index($0, "## [" ver "]") == 1 { found=1; next }
             found && /^## \[/ { exit }
             found { print }
           ' CHANGELOG.md > /tmp/release-body.md
@@ -75,8 +75,10 @@ jobs:
     steps:
       - name: Check for marketplace token
         id: token-check
+        env:
+          MTOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
         run: |
-          if [ -z "${{ secrets.MARKETPLACE_TOKEN }}" ]; then
+          if [ -z "$MTOKEN" ]; then
             echo "::warning::MARKETPLACE_TOKEN secret not set — skipping marketplace PRs. Bump skillsmith/.claude-plugin/marketplace.json and godot-prompter-marketplace/.claude-plugin/marketplace.json manually per CONTRIBUTING.md."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
@@ -91,6 +93,7 @@ jobs:
 
       - name: Open PR against skillsmith
         if: steps.token-check.outputs.skip == 'false'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
           VERSION: ${{ github.ref_name }}
