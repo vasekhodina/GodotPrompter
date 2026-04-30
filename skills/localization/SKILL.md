@@ -323,7 +323,87 @@ ITEM_SWORD_DESC          # Inventory item description
 
 ---
 
-## 9. Implementation Checklist
+## 9. Editor Locale Preview (Godot 4.5+)
+
+Godot 4.5 adds a live locale preview to the editor. You can see how your UI looks in any configured locale — translated text, RTL layout, font changes — without running the game.
+
+### How to Use
+
+1. Open **Project → Project Settings → Internationalization**.
+2. Find the **Preview Language** dropdown.
+3. Select a locale from the list of registered translations (e.g., `ja`, `cs`, `ar`).
+4. The editor viewport updates immediately to reflect the selected locale.
+
+### Benefits
+
+- Identify layout issues caused by longer translated text without entering Play mode.
+- Verify RTL layout direction for Arabic, Hebrew, and Persian.
+- Confirm that all Control nodes with text properties are properly wrapped in `tr()` keys (untranslated keys show up as-is in non-English preview).
+- Faster translation QA — iterate directly in the editor.
+
+> Reset to the default locale by selecting the blank or `en` entry in the **Preview Language** dropdown. The preview applies only in the editor and does not affect exported builds.
+
+---
+
+## 10. CSV Plural and Context Support (Godot 4.6+)
+
+Godot 4.6 extends the CSV translation format with three optional header columns that enable features previously only available in PO files.
+
+> **Note:** Godot 4.6 is in beta; verify behavior on stable release.
+
+### New CSV Columns
+
+| Column header | Purpose |
+|---------------|---------|
+| `?context` | Disambiguates keys with the same string but different meanings (e.g. "file" as a noun vs. "to file" as a verb) |
+| `?plural` | Provides the plural form of the string (for the source locale) |
+| `?pluralrule` | CLDR plural rule index for the source locale (0 = one, 1 = other, etc.) |
+
+### Example CSV with Context and Plural
+
+```csv
+keys,?context,?plural,en,cs,de
+ITEM_FILE,noun,,File,Soubor,Datei
+ITEM_FILE,verb,,File,Uložit,Ablegen
+ENEMY_COUNT,,{n} enemies,{n} enemy / {n} enemies,{n} nepřítel / {n} nepřátelé,{n} Feind / {n} Feinde
+```
+
+### Using Context in Code
+
+```gdscript
+# Translate with context to disambiguate identical keys
+var file_noun: String = tr("ITEM_FILE", "noun")    # "File" (object)
+var file_verb: String = tr("ITEM_FILE", "verb")    # "File" (action)
+
+# Without context — returns the first match for the key
+var file_default: String = tr("ITEM_FILE")
+```
+
+```csharp
+// Translate with context
+string fileNoun = Tr("ITEM_FILE", "noun");
+string fileVerb = Tr("ITEM_FILE", "verb");
+```
+
+### Using Plural in Code
+
+```gdscript
+# Pluralize with tr_n() — works with CSV plural columns in 4.6+
+var enemy_count := 3
+var msg: String = tr_n("ENEMY_COUNT", "ENEMY_COUNT", enemy_count)
+# Godot substitutes the correct plural form based on the current locale's rules
+```
+
+```csharp
+int enemyCount = 3;
+string msg = TrN("ENEMY_COUNT", "ENEMY_COUNT", enemyCount);
+```
+
+> **When to use PO vs CSV:** If you only need context and simple one/other plural rules, the new CSV columns cover most cases. For languages with three or more plural forms (Russian, Polish, Arabic), continue using PO format with full `msgstr[n]` plural arrays.
+
+---
+
+## 11. Implementation Checklist
 
 - [ ] All user-facing strings use `tr()` (or are set as translation keys on Control nodes)
 - [ ] Translation files (CSV or PO) are registered in Project Settings → Localization → Translations
@@ -335,3 +415,6 @@ ITEM_SWORD_DESC          # Inventory item description
 - [ ] Translation keys follow a consistent naming convention
 - [ ] UI layout adapts to longer/shorter text in different languages (no hardcoded widths)
 - [ ] PO format is used for languages with complex plural rules
+- [ ] Editor Locale Preview (Project Settings → Internationalization → Preview Language) is used for translation QA instead of test runs (Godot 4.5+)
+- [ ] CSV `?context` column used when the same key has different meanings in different UI contexts (Godot 4.6+)
+- [ ] CSV `?plural` / `?pluralrule` columns used for simple one/other plurals in CSV workflow; PO format used for languages with 3+ plural forms (Godot 4.6+)

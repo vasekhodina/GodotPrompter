@@ -371,7 +371,63 @@ Steam integration is outside the scope of the export pipeline itself — refer t
 
 ---
 
-## 8. Checklist
+## 8. Shader Baker (Godot 4.5+)
+
+Godot 4.5 introduces the **Shader Baker**, an export-time tool that pre-compiles shaders for the target platform. Without it, shaders compile at runtime on first use, causing visible hitches when new materials are first rendered in-game. The Shader Baker eliminates this stutter by doing the work at export time.
+
+### Enabling
+
+In **Project → Export**, open a preset and locate the **Shader Baker** section. Enable it and configure target backends (Vulkan, D3D12, Metal, GLES3) as needed.
+
+> The Shader Baker increases export build time but has no effect on game download size or runtime memory. The pre-compiled cache is embedded in the `.pck` file.
+
+### Impact by Platform
+
+| Platform | Backend | Benefit |
+|----------|---------|---------|
+| macOS / Apple Silicon | Metal | Up to 20x load time reduction on complex shader graphs |
+| Windows | D3D12 | Eliminates D3D12 pipeline state compilation stalls |
+| Mobile (Android/iOS) | GLES3 | Faster first-render on mid-range hardware |
+| Linux / Windows | Vulkan | Moderate improvement; Vulkan caches vary by driver |
+
+### CI Workflow Note
+
+The Shader Baker runs automatically when exporting via the editor GUI or CLI (`--export-release`). No extra steps are needed in CI — it is controlled by the preset configuration, not a separate CLI flag.
+
+```bash
+# Shader Baker runs as part of normal export (no extra flag needed).
+godot --headless --export-release "Windows Desktop" build/windows/MyGame.exe
+```
+
+---
+
+## 9. Windows Export — Native Resource Editing (Godot 4.5+)
+
+Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, company name) on Windows required the external `rcedit` tool. Godot 4.5 handles all of this natively at export time — no `rcedit` download or configuration needed.
+
+### What is Edited Natively
+
+| Export Preset Field | Effect on .exe |
+|---------------------|---------------|
+| `application/file_version` | File version shown in Properties → Details |
+| `application/product_version` | Product version |
+| `application/company_name` | Company name |
+| `application/product_name` | Product name |
+| `application/file_description` | Description |
+| `application/copyright` | Legal copyright |
+| `application/icon` | `.ico` file embedded as the executable icon |
+
+### Setup
+
+1. Open **Project → Export** → Windows Desktop preset.
+2. Fill in the `application/*` fields under **Application** in the preset options.
+3. Export normally — Godot writes the metadata into the `.exe` directly.
+
+> **Removing rcedit from CI:** If your project previously downloaded `rcedit` in CI and called it as a post-export step, you can remove that step. The fields in the export preset replace it entirely for Godot 4.5+.
+
+---
+
+## 10. Checklist
 
 - [ ] Export templates downloaded for the target Godot version (Editor → Export Templates)
 - [ ] `export_presets.cfg` committed to version control
@@ -387,3 +443,5 @@ Steam integration is outside the scope of the export pipeline itself — refer t
 - [ ] itch.io channels follow the naming convention (windows, linux, macos, web, android)
 - [ ] Butler API key stored as a CI secret, not hardcoded
 - [ ] Steam depot configs are kept out of public repositories
+- [ ] Shader Baker enabled in export presets for macOS, D3D12, and mobile targets (Godot 4.5+)
+- [ ] Windows `.exe` metadata (version, icon, company name) set in the export preset — rcedit no longer required (Godot 4.5+)

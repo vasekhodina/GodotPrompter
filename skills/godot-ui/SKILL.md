@@ -634,7 +634,133 @@ private void OnSearchFieldTextChanged(string newText) { }
 
 ---
 
-## 8. Checklist
+## 8. FoldableContainer (Godot 4.5+)
+
+`FoldableContainer` is a new built-in `Container` node introduced in Godot 4.5. It provides accordion-style collapsible sections with a toggle header, eliminating the boilerplate of manually wiring a `Button` to show/hide a child `VBoxContainer`.
+
+### Basic Usage
+
+```gdscript
+# In a script that builds UI dynamically:
+func _ready() -> void:
+    var foldable := FoldableContainer.new()
+    foldable.title = "Advanced Settings"
+    foldable.folded = false  # start expanded
+
+    var label := Label.new()
+    label.text = "This content can be collapsed."
+    foldable.add_child(label)
+
+    var slider := HSlider.new()
+    slider.min_value = 0.0
+    slider.max_value = 1.0
+    slider.value = 0.5
+    foldable.add_child(slider)
+
+    add_child(foldable)
+
+# Listen for toggle events:
+func _ready() -> void:
+    var foldable := $FoldableContainer
+    foldable.folding_changed.connect(_on_section_toggled)
+
+func _on_section_toggled(is_folded: bool) -> void:
+    print("Section is now: ", "folded" if is_folded else "expanded")
+```
+
+```csharp
+public override void _Ready()
+{
+    var foldable = new FoldableContainer
+    {
+        Title = "Advanced Settings",
+        Folded = false
+    };
+
+    var label = new Label { Text = "This content can be collapsed." };
+    foldable.AddChild(label);
+
+    var slider = new HSlider { MinValue = 0.0, MaxValue = 1.0, Value = 0.5 };
+    foldable.AddChild(slider);
+
+    AddChild(foldable);
+
+    // Listen for toggle:
+    foldable.FoldingChanged += OnSectionToggled;
+}
+
+private void OnSectionToggled(bool isFolded)
+{
+    GD.Print("Section is now: ", isFolded ? "folded" : "expanded");
+}
+```
+
+### Key Properties
+
+| Property | Type | Purpose |
+|----------|------|---------|
+| `title` | `String` | Text shown in the toggle header |
+| `folded` | `bool` | `true` = content hidden, `false` = content visible |
+| `title_alignment` | `HorizontalAlignment` | Align the title text within the header |
+
+### Signal
+
+| Signal | Signature | When emitted |
+|--------|-----------|--------------|
+| `folding_changed` | `(folded: bool)` | Emitted whenever the fold state toggles |
+
+> **Replaces boilerplate:** Prior to Godot 4.5, accordion sections required a `Button` + `VBoxContainer` + signal connection. `FoldableContainer` handles all of this in one node.
+
+---
+
+## 9. Stacked Label Effects (Godot 4.5+)
+
+In Godot 4.5, `Label` and `RichTextLabel` support multiple layered text effects simultaneously — for example, stacking two outline effects at different widths and colors, or combining a shadow with a glow. Previously, achieving multiple outline layers required duplicating Label nodes and layering them manually.
+
+```gdscript
+# In the inspector: Label → Theme Overrides → Constants
+# Add multiple outline layers by stacking VisualShaderNodeTextureParameter entries
+# in the Theme, or configure via add_theme_* overrides at runtime.
+
+# Example: thick outer outline + thin inner outline via theme overrides
+func apply_stacked_outlines(label: Label) -> void:
+    # Outer outline — wide, dark
+    label.add_theme_constant_override("outline_size", 6)
+    label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+
+    # Shadow (counts as a second layered effect)
+    label.add_theme_constant_override("shadow_offset_x", 2)
+    label.add_theme_constant_override("shadow_offset_y", 2)
+    label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.5))
+```
+
+```csharp
+public void ApplyStackedOutlines(Label label)
+{
+    // Outer outline — wide, dark
+    label.AddThemeConstantOverride("outline_size", 6);
+    label.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.9f));
+
+    // Shadow (second layered effect)
+    label.AddThemeConstantOverride("shadow_offset_x", 2);
+    label.AddThemeConstantOverride("shadow_offset_y", 2);
+    label.AddThemeColorOverride("font_shadow_color", new Color(0f, 0f, 0f, 0.5f));
+}
+```
+
+For `RichTextLabel`, stacked effects can also be applied using BBCode in combination with theme overrides:
+
+```gdscript
+# RichTextLabel with multiple outline-style effects via BBCode + theme
+$RichTextLabel.text = "[outline size=4 color=#000000]Level Up![/outline]"
+# Additional layers are set via theme overrides on the node as above.
+```
+
+> **Editor workflow:** Stacked effects are most easily configured via **Theme Editor → Label → Constants** or by adding multiple `FontFile`-style outline passes in the Font resource. The runtime API (`add_theme_*_override`) above works for dynamic scenarios.
+
+---
+
+## 10. Checklist
 
 - [ ] Root UI `Control` has anchor preset **Full Rect** (or appropriate preset for the layout)
 - [ ] All interactive widgets (`Button`, `LineEdit`, `Slider`) have `focus_mode = FOCUS_ALL`
@@ -650,3 +776,5 @@ private void OnSearchFieldTextChanged(string newText) { }
 - [ ] Slider and volume code uses `linear_to_db` / `db_to_linear` — not raw linear values mapped to audio bus
 - [ ] Signals connected in `_ready()` (or via the editor); no polling of UI state in `_process`
 - [ ] Tab order in `TabContainer` matches logical reading / navigation order
+- [ ] Accordion-style collapsible panels use `FoldableContainer` instead of manual Button + VBoxContainer wiring (Godot 4.5+)
+- [ ] Multiple outline/shadow layers on `Label`/`RichTextLabel` use stacked theme overrides instead of duplicated nodes (Godot 4.5+)
