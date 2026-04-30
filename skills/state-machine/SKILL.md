@@ -7,7 +7,7 @@ description: Use when implementing state machines in Godot — enum-based, node-
 
 Choose the right FSM pattern for your complexity level. All examples target Godot 4.3+ with no deprecated APIs.
 
-> **Related skills:** **player-controller** for movement state integration, **ai-navigation** for AI state patterns, **resource-pattern** for resource-based state configuration.
+> **Related skills:** **player-controller** for movement state integration, **ai-navigation** for AI state patterns, **resource-pattern** for resource-based state configuration, **animation-system** for AnimationTree states driven by FSM, **dialogue-system** for dialogue flow as a state machine.
 
 ---
 

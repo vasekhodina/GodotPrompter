@@ -7,7 +7,7 @@ description: Use when implementing tweens — property animation, method tweenin
 
 All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, then C#.
 
-> **Related skills:** **animation-system** for AnimationPlayer/AnimationTree (keyframe-based), **godot-ui** for UI transitions, **shader-basics** for tweening shader parameters, **camera-system** for camera shake and transitions.
+> **Related skills:** **animation-system** for AnimationPlayer/AnimationTree (keyframe-based), **godot-ui** for UI transitions, **shader-basics** for tweening shader parameters, **camera-system** for camera shake and transitions, **math-essentials** for easing curves and interpolation math, **particles-vfx** for code-driven VFX timing and sequencing.
 
 ---
 

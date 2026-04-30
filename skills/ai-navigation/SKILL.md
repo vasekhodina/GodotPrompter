@@ -7,7 +7,7 @@ description: Use when implementing AI movement — NavigationAgent2D/3D, steerin
 
 Cover NavigationAgent2D/3D, steering behaviors, behavior trees, and patrol patterns. All examples target Godot 4.3+ with no deprecated APIs.
 
-> **Related skills:** **state-machine** for AI state management, **component-system** for modular AI behaviors, **player-controller** for movement physics patterns.
+> **Related skills:** **state-machine** for AI state management, **component-system** for modular AI behaviors, **player-controller** for movement physics patterns, **math-essentials** for pathfinding vectors and steering math.
 
 ---
 
