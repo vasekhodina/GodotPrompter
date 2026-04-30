@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Validates skills/*/SKILL.md and agents/*.md for structure and resolvable cross-references.
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
-import { resolve, join, basename } from 'node:path';
+import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -101,9 +101,7 @@ function validateSkill({ name, path }) {
 
   // Warning: GDScript blocks without paired C# blocks in the same numbered section
   const sections = body.split(/^##\s+/m).slice(1);
-  let sectionIndex = 0;
   for (const section of sections) {
-    sectionIndex++;
     const hasGd = /```gdscript[\s\S]*?```/m.test(section);
     const hasCs = /```csharp[\s\S]*?```/m.test(section);
     if (hasGd && !hasCs) {
