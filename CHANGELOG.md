@@ -4,6 +4,42 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.0] - 2026-04-30
+
+### Added
+
+- **godot-shader-author** agent — shader specialist for canvas_item / spatial / particles / sky / fog shaders, post-processing, and Compositor effects
+- **godot-performance-profiler** agent — profiler-driven bottleneck diagnosis with prescriptive fixes from godot-optimization
+- `scripts/validate-skills.mjs` — validates SKILL.md frontmatter, cross-references, GDScript/C# parity, and implementation checklists; 0 errors at release (41 C# parity warnings documented as deferred debt)
+- `scripts/bump-version.mjs` — bumps version across `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, and sibling marketplace repos
+- `.github/workflows/release.yml` — tag-triggered release workflow with marketplace PR automation
+- **gdscript-patterns** — added Variadic Functions and Abstract Classes (Godot 4.5+)
+- **physics-system** — added SoftBody3D Forces and Impulses; updated Jolt note for 4.6 stable; updated Physics Interpolation for 4.5 SceneTree restructure
+- **shader-basics** — added Stencil Buffer Effects, SMAA Antialiasing, Shader Baker (Godot 4.5+)
+- **3d-essentials** — added Specular Occlusion, Bent Normal Maps (4.5+); SSR overhaul, Glow/AgX controls (4.6+)
+- **animation-system** — added BoneConstraint3D Modifiers (4.5+); IKModifier3D family (4.6+)
+- **xr-development** — added 4.5+ features (D3D12 backend, foveated rendering, Render Models, SpaceWarp, visionOS export); 4.6+ features (OpenXR 1.1, Spatial Entities)
+- **ai-navigation** — added Dedicated 2D Navigation Server (Godot 4.5+)
+- **export-pipeline** — added Shader Baker and Windows Native Resource Editing (Godot 4.5+)
+- **godot-ui** — added FoldableContainer and Stacked Label Effects (Godot 4.5+)
+- **localization** — added Editor Locale Preview (4.5+); CSV Plural and Context Support (4.6+)
+
+### Changed
+
+- **gdscript-patterns** — added intent note (skill is GDScript-only by design)
+- **godot-debugging** — added Implementation Checklist
+- **using-godot-prompter** — added Related skills line and Implementation Checklist
+- **multiplayer-sync** — standardized Related skills line to canonical form; added ai-navigation reciprocal cross-reference
+- **camera-system** — added cross-references to math-essentials and tween-animation
+- **player-controller** — added cross-references to 3d-essentials, animation-system, input-handling, and ai-navigation
+- **state-machine** — added cross-references to animation-system and dialogue-system
+- **input-handling** — added cross-reference to xr-development
+- **responsive-ui** — added cross-references to input-handling and localization
+- **tween-animation** — added cross-references to math-essentials and particles-vfx
+- Cross-references audited across all 44 skills — added 21 reciprocal entries; standardized cross-reference formatting repo-wide
+
+> **Release notes:** Validator baseline at release: 0 errors, 41 warnings (all C# parity — documented in `docs/superpowers/notes/2026-04-30-csharp-parity-debt.md`). Repo-wide minimum stays at Godot 4.3+; new content for 4.5/4.6 is additive with explicit version annotations.
+
 ## [1.4.1] - 2026-04-09
 
 ### Fixed
