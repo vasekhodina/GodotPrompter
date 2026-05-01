@@ -4,11 +4,13 @@ The validator (added in v1.5.0) flags these GDScript-only sections. They are int
 
 ## v1.6.0 progress (2026-05-02)
 
-10 short / trivial sections closed by `godot-csharp-engineer` in parity mode. Validator warning count dropped from 42 → 32. Remaining 22 sections continue to be picked up in v1.6.x point releases.
+10 short / trivial sections closed by `godot-csharp-engineer` in parity mode. Validator warning count dropped from 42 → 32. Remaining 23 sections continue to be picked up in v1.6.x point releases.
+
+Also: section names in the camera-system and save-load entries were aligned with the validator's reported headings (was descriptive labels, now matches `## ` heading text), and a missing camera-system entry ("7. Split Screen") was added to bring the deferred list to true parity with the validator output.
 
 ---
 
-## Deferred (count: 23 — originally 33; 10 closed in v1.6.0)
+## Deferred (count: 23 — originally 33; 10 closed in v1.6.0; 1 missing entry added during v1.6.0 cleanup)
 
 These sections have GDScript code but no C# block. Each entry notes what kind of C# would belong so a future author can pick up any single item in isolation.
 
@@ -18,8 +20,9 @@ These sections have GDScript code but no C# block. Each entry notes what kind of
 - `skills/addon-development/SKILL.md` — Section "7. Gizmos" — needs C# `EditorNode3DGizmoPlugin` subclass with `_Init`, `_GetGizmoName`, `_HasGizmo`, `_Redraw`, `_GetHandleValue`, `_SetHandle`, `_CommitHandle`; complex undo/redo wiring; all under `#if TOOLS`
 - `skills/addon-development/SKILL.md` — Section "8. Testing Plugins" — needs C# equivalent of the plugin reload snippet and `print()` → `GD.Print()` logging guidance; the lifecycle gotcha table should note C# compilation failures specifically
 - ~~`skills/audio-system/SKILL.md` — Section "4. Spatial Audio (2D & 3D)" — short C# note: `AudioStreamPlayer2D` / `AudioStreamPlayer3D` properties are identical in C#; `AudioListener2D`/`AudioListener3D.MakeCurrent()` pattern; medium length~~ **(closed in v1.6.0)**
-- `skills/camera-system/SKILL.md` — Section "Scene: Player (CharacterBody3D) > CameraPivot (Node3D) > SpringArm3D > Camera3D" — substantial: C# `SpringArm3D` subclass with `_UnhandledInput` and `_Process`, mouse delta accumulation, `TopLevel = true`; plus Orbit Camera variant
-- `skills/camera-system/SKILL.md` — Section "Transition between two Camera3D nodes (blends position and FOV)" — medium: C# `CameraTransitionManager` class with async `Transition2D` / `Transition3D` methods using `Tween` and `await ToSignal`
+- `skills/camera-system/SKILL.md` — Section "5. Camera3D Patterns" — substantial: C# `SpringArm3D` subclass with `_UnhandledInput` and `_Process`, mouse delta accumulation, `TopLevel = true`; plus Orbit Camera variant
+- `skills/camera-system/SKILL.md` — Section "6. Camera Transitions" — medium: C# `CameraTransitionManager` class with async `Transition2D` / `Transition3D` methods using `Tween` and `await ToSignal`
+- `skills/camera-system/SKILL.md` — Section "7. Split Screen (Local Multiplayer)" — short to medium: C# `SubViewport` setup with multiple `Camera3D` nodes assigned to `Custom Viewport`; UI side is straightforward `SubViewportContainer` placement
 - ~~`skills/component-system/SKILL.md` — Section "7. Wiring Components" — short: C# `[Export]` property wiring, `[Export] public HealthComponent HealthComponent`, `GetNode<HealthComponent>()` patterns; straightforward translation~~ **(closed in v1.6.0)**
 - ~~`skills/dedicated-server/SKILL.md` — Section "1. Headless Export" — short: C# `OS.HasFeature("dedicated_server")` boot check, `RenderingServer.SetRenderLoopEnabled(false)`; export preset guidance is language-agnostic~~ **(closed in v1.6.0)**
 - `skills/dedicated-server/SKILL.md` — Section "6. Deployment" — Dockerfile and shell commands are language-agnostic; the only C# addition needed is a note that `.NET` runtime must be bundled in the server export and the C# `DisplayServer.GetName()` equivalent of the headless detection
@@ -39,7 +42,7 @@ These sections have GDScript code but no C# block. Each entry notes what kind of
 - ~~`skills/resource-pattern/SKILL.md` — Section "6. Resource Collections" — typed array of `Resource` subclasses; C# `[Export] public Godot.Collections.Array<MyResource>` pattern; short~~ **(closed in v1.6.0)**
 - ~~`skills/resource-pattern/SKILL.md` — Section "8. Sharing vs Unique" — `.Duplicate()` and resource instancing concepts; C# `.Duplicate()` call is identical API; short~~ **(closed in v1.6.0)**
 - `skills/resource-pattern/SKILL.md` — Section "10. Anti-patterns" — comment-only GDScript blocks showing bad patterns; C# equivalents are structural translations of the anti-pattern comments; short but low value
-- `skills/save-load/SKILL.md` — Section "Assign a Callable that accepts a Dictionary to restore state" — `SaveableComponent` with `Callable` fields; C# equivalent uses `Callable.From()` or a delegate approach; medium — the `Callable` API differs meaningfully between GDScript and C#
+- `skills/save-load/SKILL.md` — Section "4. Save Architecture Pattern" — `SaveableComponent` with `Callable` fields; C# equivalent uses `Callable.From()` or a delegate approach; medium — the `Callable` API differs meaningfully between GDScript and C#
 - `skills/save-load/SKILL.md` — Section "6. Version Migration" — incremental migration function; C# translation is a direct `switch` on `version` integer; short to medium
 - `skills/scene-organization/SKILL.md` — Section "4. Node Communication Patterns" — signal bus and direct reference patterns; C# equivalents are `[Signal]` delegates and `GetNode<>()` calls; medium
 - `skills/shader-basics/SKILL.md` — Section "7. Compositor Effects (Godot 4.3+)" — `CompositorEffect` subclass with `@tool`; C# equivalent is a `[Tool]` class extending `CompositorEffect` with `_RenderCallback` override and `RenderingDevice` access; medium complexity, render pipeline knowledge required

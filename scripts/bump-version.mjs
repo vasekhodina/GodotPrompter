@@ -28,8 +28,9 @@ const siblingTargets = [
 ];
 
 // Path syntax: "a.b.c" walks objects; "a[name=X].b" finds the array element where .name === X.
+// The matchKey accepts hyphens and underscores so keys like "display-name" or "plugin_id" work.
 function resolveStep(node, step) {
-  const arrayMatch = step.match(/^(.+?)\[(\w+)=(.+)\]$/);
+  const arrayMatch = step.match(/^(.+?)\[([\w-]+)=(.+)\]$/);
   if (arrayMatch) {
     const [, arrayKey, matchKey, matchVal] = arrayMatch;
     const arr = node?.[arrayKey];
@@ -47,9 +48,14 @@ function getByPath(obj, path) {
 function setByPath(obj, path, value) {
   const parts = path.split('.');
   const last = parts.pop();
+  // The leaf step must be a plain object key (no array selector at the end).
+  // Without this guard, a path like "plugins[name=foo]" would silently write
+  // a property literally named "plugins[name=foo]" on the root object.
+  if (/[\[\]]/.test(last)) {
+    throw new Error(`Leaf step '${last}' must be a plain key, not an array selector. Append '.<field>' to the path.`);
+  }
   const parent = parts.reduce((acc, k) => resolveStep(acc, k), obj);
   if (parent == null) throw new Error(`Path ${path} did not resolve to a parent`);
-  // The leaf step is always a plain key on the resolved parent (no array selector at the end).
   parent[/^\d+$/.test(last) ? Number(last) : last] = value;
 }
 

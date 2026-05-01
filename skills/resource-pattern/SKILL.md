@@ -379,29 +379,32 @@ public partial class ItemDatabase : Resource
 }
 
 // Loading all resources from a directory at runtime.
-public static Array<ItemData> LoadAllItems(string dirPath)
+public static class ItemDatabaseLoader
 {
-    var result = new Array<ItemData>();
-    using var dir = DirAccess.Open(dirPath);
-    if (dir == null)
+    public static Array<ItemData> LoadAllItems(string dirPath)
     {
-        GD.PushError($"ItemDatabase: cannot open directory '{dirPath}'");
+        var result = new Array<ItemData>();
+        using var dir = DirAccess.Open(dirPath);
+        if (dir == null)
+        {
+            GD.PushError($"ItemDatabase: cannot open directory '{dirPath}'");
+            return result;
+        }
+
+        dir.ListDirBegin();
+        string fileName = dir.GetNext();
+        while (fileName != string.Empty)
+        {
+            if (!dir.CurrentIsDir() && (fileName.EndsWith(".tres") || fileName.EndsWith(".res")))
+            {
+                var res = ResourceLoader.Load(dirPath.PathJoin(fileName));
+                if (res is ItemData item)
+                    result.Add(item);
+            }
+            fileName = dir.GetNext();
+        }
         return result;
     }
-
-    dir.ListDirBegin();
-    string fileName = dir.GetNext();
-    while (fileName != string.Empty)
-    {
-        if (!dir.CurrentIsDir() && (fileName.EndsWith(".tres") || fileName.EndsWith(".res")))
-        {
-            var res = ResourceLoader.Load(dirPath.PathJoin(fileName));
-            if (res is ItemData item)
-                result.Add(item);
-        }
-        fileName = dir.GetNext();
-    }
-    return result;
 }
 ```
 

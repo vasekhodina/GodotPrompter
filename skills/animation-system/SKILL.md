@@ -677,7 +677,7 @@ func _ready() -> void:
 public override void _Ready()
 {
     var skeleton = GetNode<Skeleton3D>("Skeleton3D");
-    var ik = new FABRIK3D();
+    var ik = new Fabrik3D();
     skeleton.AddChild(ik);
     ik.BoneChain = new string[] { "Shoulder", "Elbow", "Wrist" };
     ik.TargetNode = GetNode("../IKTarget").GetPath();
@@ -817,7 +817,7 @@ public partial class FootIK : Node3D
 
 **Perf cost:** One raycast and one `FABRIK3D` per leg every frame. Two-leg humanoid → 2 raycasts + 2 IK solves. For background NPCs, gate this behind a distance check or run on `_physics_process` at 30 Hz instead of `_process`. For exactly-2-bone humanoid legs, `TwoBoneIK3D` solves in roughly half the time of `FABRIK3D`.
 
-> **Note:** `IKModifier3D` was introduced in Godot 4.6 beta 1 and is still being finalized. Property names and subclass count may change before the stable release. Use the built-in Inspector for the current API, and see the [4.6 release announcement](https://godotengine.org/article/dev-snapshot-godot-4-6-beta-1/) for details.
+> **Note:** `IKModifier3D` was introduced in Godot 4.6 beta 1 and is still being finalized. Property names, subclass count, and C# binding names may change before the stable release. The C# names here follow Godot's standard binding convention (acronyms PascalCased: `Fabrik3D`, `Ccdik3D`, `JacobianIk3D`, `TwoBoneIk3D`) — verify against your local 4.6 build before relying on them. See the [4.6 release announcement](https://godotengine.org/article/dev-snapshot-godot-4-6-beta-1/) for details.
 
 > **When to use:** `IKModifier3D` subclasses replace custom IK scripts and third-party IK plugins. Use `TwoBoneIK3D` for leg/arm IK (fastest, exact), `FABRIK3D` for longer chains and natural-looking reach, `CCDIK3D` for tentacles or tails.
 

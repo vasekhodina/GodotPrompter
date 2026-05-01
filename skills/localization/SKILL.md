@@ -258,6 +258,13 @@ public partial class LocaleAwarePanel : Control
         TranslationServer.Singleton.LocaleChanged += ApplyLayoutForLocale;
     }
 
+    public override void _ExitTree()
+    {
+        // TranslationServer outlives every scene — without this unsubscribe,
+        // each panel instance leaks a delegate reference for the lifetime of the process.
+        TranslationServer.Singleton.LocaleChanged -= ApplyLayoutForLocale;
+    }
+
     private void ApplyLayoutForLocale()
     {
         string locale = TranslationServer.Singleton.GetLocale();

@@ -342,7 +342,8 @@ public partial class Pickup : Node3D
     public override void _Ready()
     {
         var health = GetNodeOrNull<HealthComponent>("HealthComponent");
-        health?.Connect(HealthComponent.SignalName.Died, new Callable(this, MethodName.OnDied));
+        if (health != null)
+            health.Died += OnDied;
     }
 
     private void OnDied() { /* ... */ }
