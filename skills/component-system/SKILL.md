@@ -313,6 +313,42 @@ func _ready() -> void:
 
 > Prefer `@export` when the wired node lives elsewhere in the tree. Prefer `@onready` for direct children that are always present. Use `get_node_or_null` when the component is optional.
 
+### C# parity
+
+```csharp
+// Pattern 1: [Export] property — drag-and-drop in the Inspector.
+public partial class HurtboxComponent : Area3D
+{
+    [Export] public HealthComponent Health { get; set; }
+}
+
+// Pattern 2: GetNode<T> for a known child path (equivalent to @onready var x := $Path).
+public partial class Enemy : CharacterBody3D
+{
+    private HealthComponent _health;
+    private HurtboxComponent _hurtbox;
+
+    public override void _Ready()
+    {
+        _health = GetNode<HealthComponent>("HealthComponent");
+        _hurtbox = GetNode<HurtboxComponent>("HurtboxComponent");
+        _health.Died += QueueFree;
+    }
+}
+
+// Pattern 3: GetNodeOrNull<T> when the component is optional (equivalent to get_node_or_null).
+public partial class Pickup : Node3D
+{
+    public override void _Ready()
+    {
+        var health = GetNodeOrNull<HealthComponent>("HealthComponent");
+        health?.Connect(HealthComponent.SignalName.Died, new Callable(this, MethodName.OnDied));
+    }
+
+    private void OnDied() { /* ... */ }
+}
+```
+
 ---
 
 ## 8. Finding Components at Runtime
