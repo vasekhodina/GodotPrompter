@@ -232,6 +232,40 @@ Key additional properties:
 # Only add an explicit AudioListener if you need a different listening position.
 ```
 
+```csharp
+// 2D spatial player
+public partial class Footsteps : AudioStreamPlayer2D
+{
+    public override void _Ready()
+    {
+        Bus = "SFX";
+        MaxDistance = 1000.0f;     // Pixels at which volume reaches zero
+        Attenuation = 1.0f;         // Linear falloff (higher = sharper)
+        MaxPolyphony = 4;           // Allow overlapping footstep sounds
+    }
+
+    public void PlayStep() => Play();
+}
+
+// 3D spatial player
+public partial class EngineHum : AudioStreamPlayer3D
+{
+    public override void _Ready()
+    {
+        Bus = "SFX";
+        UnitSize = 4.0f;            // Meters at which volume is 0 dB
+        MaxDistance = 50.0f;
+        AttenuationModel = AttenuationModelEnum.InverseDistance;
+    }
+}
+
+// Custom listener — overrides the default Camera2D / Camera3D listener.
+public partial class FollowCamListener : AudioListener3D
+{
+    public override void _Ready() => MakeCurrent();
+}
+```
+
 ---
 
 ## 5. Music Manager (Autoload)
