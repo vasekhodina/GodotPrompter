@@ -12,26 +12,45 @@ if (!newVersion || !/^\d+\.\d+\.\d+$/.test(newVersion)) {
   process.exit(1);
 }
 
+// In multi-plugin marketplaces (e.g. skillsmith), find the godot-prompter entry by name
+// instead of relying on array position — sibling marketplaces may add other plugins.
+const PLUGIN_NAME = 'godot-prompter';
+
 const inRepoTargets = [
   { path: resolve(ROOT, 'package.json'), key: 'version' },
   { path: resolve(ROOT, '.claude-plugin/plugin.json'), key: 'version' },
-  { path: resolve(ROOT, '.claude-plugin/marketplace.json'), key: 'plugins.0.version' },
+  { path: resolve(ROOT, '.claude-plugin/marketplace.json'), key: `plugins[name=${PLUGIN_NAME}].version` },
 ];
 
 const siblingTargets = [
-  { path: resolve(ROOT, '..', 'skillsmith', '.claude-plugin', 'marketplace.json'), key: 'plugins.0.version', label: 'skillsmith' },
-  { path: resolve(ROOT, '..', 'godot-prompter-marketplace', '.claude-plugin', 'marketplace.json'), key: 'plugins.0.version', label: 'godot-prompter-marketplace' },
+  { path: resolve(ROOT, '..', 'skillsmith', '.claude-plugin', 'marketplace.json'), key: `plugins[name=${PLUGIN_NAME}].version`, label: 'skillsmith' },
+  { path: resolve(ROOT, '..', 'godot-prompter-marketplace', '.claude-plugin', 'marketplace.json'), key: `plugins[name=${PLUGIN_NAME}].version`, label: 'godot-prompter-marketplace' },
 ];
 
+// Path syntax: "a.b.c" walks objects; "a[name=X].b" finds the array element where .name === X.
+function resolveStep(node, step) {
+  const arrayMatch = step.match(/^(.+?)\[(\w+)=(.+)\]$/);
+  if (arrayMatch) {
+    const [, arrayKey, matchKey, matchVal] = arrayMatch;
+    const arr = node?.[arrayKey];
+    if (!Array.isArray(arr)) return undefined;
+    return arr.find(item => item?.[matchKey] === matchVal);
+  }
+  if (/^\d+$/.test(step)) return node?.[Number(step)];
+  return node?.[step];
+}
+
 function getByPath(obj, path) {
-  return path.split('.').reduce((acc, k) => acc?.[/^\d+$/.test(k) ? Number(k) : k], obj);
+  return path.split('.').reduce((acc, k) => (acc == null ? acc : resolveStep(acc, k)), obj);
 }
 
 function setByPath(obj, path, value) {
   const parts = path.split('.');
   const last = parts.pop();
-  const target = parts.reduce((acc, k) => acc[/^\d+$/.test(k) ? Number(k) : k], obj);
-  target[/^\d+$/.test(last) ? Number(last) : last] = value;
+  const parent = parts.reduce((acc, k) => resolveStep(acc, k), obj);
+  if (parent == null) throw new Error(`Path ${path} did not resolve to a parent`);
+  // The leaf step is always a plain key on the resolved parent (no array selector at the end).
+  parent[/^\d+$/.test(last) ? Number(last) : last] = value;
 }
 
 function bump(target) {

@@ -4,6 +4,34 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.0] - 2026-05-02
+
+### Added
+
+- **godot-animator** agent — animation graph specialist (AnimationPlayer vs AnimationTree decisions, blend trees, IKModifier3D family, BoneConstraint3D, retargeting); distinguishes animation FSM from gameplay FSM
+- **godot-csharp-engineer** agent — C#-first specialist with two modes: user-code mode (idiomatic C#, `[Signal]` delegates, GC-light, Variant-light) and parity mode for closing this repo's own C# parity debt
+- **godot-ui-designer** agent — Control-tree UI specialist (container-driven layout, Theme resources, responsive design, `TranslationServer` / RTL hooks, Godot 4.5+ FoldableContainer / Stacked Label Effects)
+- **animation-system** — IKModifier3D solver comparison (cost / joint count / notes per solver), two-bone arm reach recipe with influence blending (CCDIK3D), foot placement on terrain recipe (FABRIK3D + raycast); GDScript and C# parity for both recipes (Godot 4.6+)
+
+### Changed
+
+- **godot-game-dev** and **godot-game-architect** agent descriptions — added routing notes deferring to `godot-csharp-engineer`, `godot-animator`, and `godot-ui-designer` for matching specialties
+- C# parity sweep — closed 10 short / trivial deferred sections via `godot-csharp-engineer` in parity mode:
+  - `2d-essentials` — 2D Antialiasing
+  - `audio-system` — Spatial Audio (2D & 3D)
+  - `component-system` — Wiring Components
+  - `dedicated-server` — Headless Export
+  - `dependency-injection` — The Problem
+  - `localization` — Right-to-Left (RTL) Support
+  - `particles-vfx` — Subemitters; Flipbook Animation (2D)
+  - `resource-pattern` — Resource Collections; Sharing vs Unique
+
+### Fixed
+
+- `scripts/bump-version.mjs` — find the `godot-prompter` plugin in sibling marketplaces by name instead of by array index. Previously bumped the wrong plugin in multi-plugin marketplaces (e.g. skillsmith, where `logseq-brain` is at index 0).
+
+> **Release notes:** Validator baseline at release: 0 errors, 32 warnings (down from 42 in v1.5.0). Agent count: 5 → 8. Skill count unchanged at 44. Repo-wide minimum stays at Godot 4.3+; new IK content is annotated `(Godot 4.6+)` since IKModifier3D requires 4.6.
+
 ## [1.5.0] - 2026-04-30
 
 ### Added
