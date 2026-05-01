@@ -31,6 +31,34 @@ func attack() -> void:
     AudioManager.play_sfx("attack")        # same AudioManager dependency again
 ```
 
+```csharp
+// BAD — tight coupling via direct autoload / global access scattered everywhere
+
+// Player.cs
+public partial class Player : CharacterBody3D
+{
+    private int _health = 100;
+
+    public void TakeDamage(int amount)
+    {
+        _health -= amount;
+        GetNode<AudioManager>("/root/AudioManager").PlaySfx("hurt");        // hard dependency
+        GetNode<UIManager>("/root/UIManager").UpdateHealthBar(_health);     // hard dependency
+        if (_health <= 0)
+            GetNode<GameState>("/root/GameState").RecordDeath();            // hard dependency
+    }
+}
+
+// Enemy.cs
+public partial class Enemy : CharacterBody3D
+{
+    public void Attack()
+    {
+        GetNode<AudioManager>("/root/AudioManager").PlaySfx("attack");      // same dependency again
+    }
+}
+```
+
 **Problems with this approach:**
 
 - Every node that calls `AudioManager` directly is coupled to its concrete implementation.
