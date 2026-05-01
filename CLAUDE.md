@@ -40,12 +40,15 @@ skills/                     # 44 domain-specific skill folders
   <skill-name>/
     SKILL.md                # Main skill document (YAML frontmatter required)
     *.md                    # Optional supporting references (e.g. references/ subfolder in using-godot-prompter)
-agents/                     # 5 specialized agent definitions
+agents/                     # 8 specialized agent definitions
   godot-game-architect.md   # System design and architecture planning
   godot-game-dev.md         # Feature implementation guided by skills
   godot-code-reviewer.md    # Code review against Godot best practices
   godot-shader-author.md    # Shader specialist (canvas_item / spatial / particles / sky / fog / Compositor)
   godot-performance-profiler.md  # Profiler-driven bottleneck diagnosis
+  godot-animator.md         # Animation graphs, IKModifier3D, BoneConstraint3D, retargeting
+  godot-csharp-engineer.md  # C#-first development; parity mode for repo C# debt
+  godot-ui-designer.md      # Control-tree UI, themes, responsive layouts, localization
 commands/                   # Slash commands (reserved)
 docs/superpowers/           # Design specs and implementation plans
   plans/                    # Phase implementation plans
