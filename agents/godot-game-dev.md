@@ -7,6 +7,8 @@ description: |
   <example>Context: User needs to implement enemy AI. user: "I need to create a behavior tree for my enemy AI that patrols, chases the player, and attacks" assistant: "I'll use the godot-game-dev agent to implement the enemy AI." <commentary>The user needs concrete implementation — use the game dev agent to write code guided by ai-navigation and state-machine skills.</commentary></example>
   <example>Context: User has a physics bug. user: "My CharacterBody2D keeps sliding off moving platforms" assistant: "Let me use the godot-game-dev agent to diagnose and fix the platform physics issue." <commentary>Implementation-level debugging of Godot physics — use game dev agent with player-controller and godot-debugging skills.</commentary></example>
   <example>Context: User needs a save system. user: "I need to implement save/load for my game" assistant: "I'll use the godot-game-dev agent to implement the save/load system." <commentary>Concrete implementation task — use game dev agent with save-load skill.</commentary></example>
+
+  Routing: For C#-heavy projects prefer `godot-csharp-engineer`; for animation graphs / IK / retargeting prefer `godot-animator`; for Control-tree UI work prefer `godot-ui-designer`.
 model: inherit
 ---
 
