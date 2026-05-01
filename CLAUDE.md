@@ -4,7 +4,7 @@
 
 GodotPrompter is an open-source agentic skills framework for Godot 4.x game development, supporting both GDScript and C#. It provides domain-specific skills that AI coding agents load on demand for Godot-specific guidance.
 
-This is a **documentation/skills repository** — no build, test, or lint commands. Changes are validated by reading skills, verifying code examples in Godot 4.3+, and running the agent integration tests in `tests/agent-integration/TEST_PLAN.md`.
+This is a **documentation/skills repository**. There is no application build/lint, but `node scripts/validate-skills.mjs` checks SKILL.md frontmatter, cross-references, and structure — it runs in CI on every release tag. Otherwise, changes are validated by reading skills, verifying code examples in Godot 4.3+, and running the agent integration tests in `tests/agent-integration/TEST_PLAN.md`.
 
 ## Supported Platforms
 
@@ -40,20 +40,29 @@ skills/                     # 44 domain-specific skill folders
   <skill-name>/
     SKILL.md                # Main skill document (YAML frontmatter required)
     *.md                    # Optional supporting references (e.g. references/ subfolder in using-godot-prompter)
-agents/                     # 3 specialized agent definitions
+agents/                     # 5 specialized agent definitions
   godot-game-architect.md   # System design and architecture planning
   godot-game-dev.md         # Feature implementation guided by skills
   godot-code-reviewer.md    # Code review against Godot best practices
+  godot-shader-author.md    # Shader specialist (canvas_item / spatial / particles / sky / fog / Compositor)
+  godot-performance-profiler.md  # Profiler-driven bottleneck diagnosis
 commands/                   # Slash commands (reserved)
 docs/superpowers/           # Design specs and implementation plans
   plans/                    # Phase implementation plans
   specs/                    # Design specification documents
+  notes/                    # Per-release research notes and C# parity debt
 tests/agent-integration/    # Agent test plan and results
+scripts/                    # Release/maintenance helpers
+  validate-skills.mjs       # Frontmatter/cross-ref validator (used by CI)
+  bump-version.mjs          # Version bumper across plugin.json, package.json, marketplace.json
 AGENTS.md, GEMINI.md        # Root @-imports re-exporting using-godot-prompter for Codex/Gemini
 .claude-plugin/             # Claude Code plugin manifest
+  plugin.json               # Plugin metadata (version must match package.json)
+  marketplace.json          # Self-marketplace entry (mirrors plugin.json version)
 .cursor-plugin/             # Cursor plugin manifest
 .codex/                     # Codex install instructions
 .opencode/                  # OpenCode plugin loader + install guide
+.github/workflows/release.yml  # Tag-triggered: validates, creates GH release, opens marketplace PRs
 ```
 
 ## SKILL.md Format
@@ -92,11 +101,10 @@ model: inherit
 Current version: check `package.json` and `.claude-plugin/plugin.json` (must match).
 
 When releasing (full command sequence in `CONTRIBUTING.md`):
-1. Update version in `.claude-plugin/plugin.json`, `package.json`, `CHANGELOG.md`
-2. Commit, tag (`v<version>`), push with tags
-3. Create GitHub release
-4. Bump version in `skillsmith/.claude-plugin/marketplace.json` (primary distribution)
-5. Also bump version in legacy `godot-prompter-marketplace/.claude-plugin/marketplace.json` (for existing installs only — not advertised to new users)
+1. `node scripts/bump-version.mjs <version>` — bumps `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, plus sibling marketplaces if present
+2. Update `CHANGELOG.md` with the new section
+3. Commit, tag (`v<version>`), push with tags — `.github/workflows/release.yml` then validates, creates the GitHub release, and opens marketplace PRs (when `MARKETPLACE_TOKEN` is configured)
+4. If the workflow's marketplace step is skipped, manually bump `skillsmith/.claude-plugin/marketplace.json` (primary) and the legacy `godot-prompter-marketplace/.claude-plugin/marketplace.json`
 
 ## Code Style
 
