@@ -471,6 +471,27 @@ $ParentParticles.process_material = parent_mat
 parent_mat.sub_emitter_node = $ChildParticles.get_path()
 ```
 
+```csharp
+public partial class Explosion : GpuParticles3D
+{
+    [Export] public GpuParticles3D ChildParticles { get; set; }
+
+    public override void _Ready()
+    {
+        var parentMat = new ParticleProcessMaterial
+        {
+            SubEmitterMode = ParticleProcessMaterial.SubEmitterModeEnum.AtEnd,
+            SubEmitterAmountAtEnd = 8,
+            SubEmitterKeepVelocity = true,
+        };
+        ProcessMaterial = parentMat;
+        parentMat.SubEmitterNode = ChildParticles.GetPath();
+    }
+}
+```
+
+> Most projects configure subemitters in the Inspector (drag the child node onto the `SubEmitterNode` slot of the `ParticleProcessMaterial`). The C# code above is only needed when building particle effects programmatically.
+
 ### Limitations
 
 - Child particle **amount** caps the total active sub-emitter particles
