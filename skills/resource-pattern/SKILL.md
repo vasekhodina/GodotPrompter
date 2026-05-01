@@ -357,6 +357,56 @@ func load_all_items(dir_path: String) -> Array[ItemData]:
     return result
 ```
 
+```csharp
+// ItemDatabase.cs — typed Resource collection exposed to the Inspector.
+using Godot;
+using Godot.Collections;
+
+[GlobalClass]
+public partial class ItemDatabase : Resource
+{
+    [Export] public Array<ItemData> Items { get; set; } = new();
+
+    public ItemData FindByName(string itemName)
+    {
+        foreach (ItemData item in Items)
+        {
+            if (item.Name == itemName)
+                return item;
+        }
+        return null;
+    }
+}
+
+// Loading all resources from a directory at runtime.
+public static Array<ItemData> LoadAllItems(string dirPath)
+{
+    var result = new Array<ItemData>();
+    using var dir = DirAccess.Open(dirPath);
+    if (dir == null)
+    {
+        GD.PushError($"ItemDatabase: cannot open directory '{dirPath}'");
+        return result;
+    }
+
+    dir.ListDirBegin();
+    string fileName = dir.GetNext();
+    while (fileName != string.Empty)
+    {
+        if (!dir.CurrentIsDir() && (fileName.EndsWith(".tres") || fileName.EndsWith(".res")))
+        {
+            var res = ResourceLoader.Load(dirPath.PathJoin(fileName));
+            if (res is ItemData item)
+                result.Add(item);
+        }
+        fileName = dir.GetNext();
+    }
+    return result;
+}
+```
+
+> Use `Godot.Collections.Array<T>` (not `System.Collections.Generic.List<T>`) for `[Export]` — only the Godot collection is editor-serializable.
+
 ---
 
 ## 7. Resource vs Node
@@ -398,7 +448,26 @@ func _ready() -> void:
     stats = stats.duplicate(true)
 ```
 
-`duplicate()` returns a new Resource with the same property values. The original `.tres` file is untouched.
+```csharp
+public partial class Enemy : CharacterBody3D
+{
+    [Export] public EnemyStats StatsTemplate { get; set; }
+    private EnemyStats _stats;
+
+    public override void _Ready()
+    {
+        // Shallow duplicate — referenced sub-resources still point at the original.
+        _stats = (EnemyStats)StatsTemplate.Duplicate();
+
+        // Deep duplicate — sub-resources are also duplicated. Use only when needed (cost scales).
+        // _stats = (EnemyStats)StatsTemplate.Duplicate(subresources: true);
+
+        _stats.CurrentHealth = _stats.MaxHealth;
+    }
+}
+```
+
+`duplicate()` (`Duplicate()` in C#) returns a new Resource with the same property values. The original `.tres` file is untouched.
 
 **`make_unique()` in the editor:** In the Inspector, any sub-resource slot shows a **Make Unique** button. Clicking it embeds a private copy of the sub-resource into the parent scene instead of referencing the shared file. Use this when one scene needs different values than the shared default.
 
