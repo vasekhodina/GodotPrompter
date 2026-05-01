@@ -603,7 +603,15 @@ Many drawing methods support an `antialiased` parameter:
 draw_line(Vector2.ZERO, Vector2(100, 50), Color.WHITE, 2.0, true)  # antialiased = true
 ```
 
-`Line2D` has an `Antialiased` property in the inspector. This works by generating additional geometry — no MSAA needed.
+```csharp
+// Equivalent in a CanvasItem subclass (e.g., a custom Control or Node2D):
+public override void _Draw()
+{
+    DrawLine(new Vector2(0, 0), new Vector2(100, 50), Colors.White, width: 2.0f, antialiased: true);
+}
+```
+
+`Line2D` has an `Antialiased` property in the inspector — set it via `line2D.Antialiased = true` in C# or as an Inspector toggle in the editor. This works by generating additional geometry — no MSAA needed.
 
 ### MSAA 2D
 
