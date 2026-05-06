@@ -20,5 +20,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jame581/GodotPrompter.git"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/tokenizer": "^0.0.4",
+    "js-tiktoken": "^1.0.20"
   }
 }
