@@ -20,6 +20,9 @@ const inRepoTargets = [
   { path: resolve(ROOT, 'package.json'), key: 'version' },
   { path: resolve(ROOT, '.claude-plugin/plugin.json'), key: 'version' },
   { path: resolve(ROOT, '.claude-plugin/marketplace.json'), key: `plugins[name=${PLUGIN_NAME}].version` },
+  // Platform-specific manifests — easily missed before v1.7.1 because they live outside .claude-plugin/.
+  { path: resolve(ROOT, '.cursor-plugin/plugin.json'), key: 'version' },
+  { path: resolve(ROOT, 'gemini-extension.json'), key: 'version' },
 ];
 
 // Sibling marketplaces. Tries each candidate path in order; first existing one wins per label.

@@ -81,6 +81,10 @@ Load `godot-prompter:godot-code-review` to review the code against Godot-specifi
 - **godot-code-reviewer** — Reviews code against Godot best practices
 - **godot-shader-author** — Authors custom shaders, post-processing, Compositor effects
 - **godot-performance-profiler** — Diagnoses performance issues from profiler data
+- **godot-animator** — Designs animation graphs, blend trees, IKModifier3D, BoneConstraint3D, retargeting
+- **godot-csharp-engineer** — C#-first development; parity mode for closing this repo's C# debt
+- **godot-ui-designer** — Builds Control-tree UI — themes, responsive layouts, localization-aware
+- **godot-tools-engineer** — Editor plugins, custom inspectors, gizmos, `@tool` scripts, plugin distribution
 
 ### Plan Storage
 Implementation plans and design docs are saved to `docs/godot-prompter/plans/` and `docs/godot-prompter/specs/` in the user's project.
