@@ -12,6 +12,15 @@ const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const includeFixtures = args.includes('--include-fixtures');
 
+// Token-budget rule: skills should keep SKILL.md <= 16 KB. References (skills/<name>/references/*.md)
+// are unrestricted because they only load when an agent explicitly opens them.
+const TOKEN_BUDGET_BYTES = 16 * 1024;
+
+// Skills that are intentionally GDScript-only by design. Their sections still emit
+// a `csharp-parity-accepted` warning (so the count is visible) but do NOT count as
+// deferred parity debt.
+const GDSCRIPT_ONLY_BY_DESIGN = new Set(['gdscript-patterns', 'gdscript-advanced']);
+
 const errors = [];
 const warnings = [];
 
@@ -109,12 +118,21 @@ function validateSkill({ name, path }) {
     return inFence && /^##\s+/.test(line) ? '__MASKED_FENCE_HEADER__' : line;
   }).join('\n');
   const sections = masked.split(/^##\s+/m).slice(1);
+  // Determine whether this skill is on the gdscript-only-by-design allowlist.
+  // The skill name is the parent folder name of SKILL.md.
+  const skillName = path.split(/[\\/]/).slice(-2, -1)[0];
+  const isGdscriptOnly = GDSCRIPT_ONLY_BY_DESIGN.has(skillName);
+
   for (const section of sections) {
     const hasGd = /```gdscript[\s\S]*?```/m.test(section);
     const hasCs = /```csharp[\s\S]*?```/m.test(section);
     if (hasGd && !hasCs) {
       const sectionTitle = section.split('\n', 1)[0].slice(0, 60);
-      record(warnings, path, 'csharp-parity-missing', `Section "${sectionTitle}" has GDScript but no C# block`);
+      const rule = isGdscriptOnly ? 'csharp-parity-accepted' : 'csharp-parity-missing';
+      const msg = isGdscriptOnly
+        ? `Section "${sectionTitle}" is GDScript-only by design (allowlisted skill)`
+        : `Section "${sectionTitle}" has GDScript but no C# block`;
+      record(warnings, path, rule, msg);
     }
   }
 
@@ -122,6 +140,14 @@ function validateSkill({ name, path }) {
   const tail = body.split('\n').slice(-40).join('\n');
   if (!/-\s*\[\s*\]/.test(tail)) {
     record(warnings, path, 'checklist-missing', 'No implementation checklist (`- [ ]` items) found near end of file');
+  }
+
+  // Token-budget warning: SKILL.md should be under 16 KB.
+  // Restructure long skills using Pattern X (core SKILL.md + references/<topic>.md).
+  const sizeBytes = Buffer.byteLength(content, 'utf8');
+  if (sizeBytes >= TOKEN_BUDGET_BYTES) {
+    const kb = (sizeBytes / 1024).toFixed(1);
+    record(warnings, path, 'token-budget-exceeded', `SKILL.md is ${kb} KB (budget: ${TOKEN_BUDGET_BYTES/1024} KB) — consider splitting into references/*.md`);
   }
 }
 
@@ -155,6 +181,25 @@ if (includeFixtures) {
   }
 }
 for (const t of targets) validateSkill(t);
+
+// Orphan-reference check: every skills/<name>/references/*.md must be linked from its parent SKILL.md.
+function validateOrphanReferences() {
+  for (const t of targets) {
+    const skillDir = t.path.replace(/[\\/]SKILL\.md$/, '');
+    const refsDir = join(skillDir, 'references');
+    if (!existsSync(refsDir)) continue;
+    const skillContent = readFileSync(t.path, 'utf8');
+    for (const ref of readdirSync(refsDir).filter(n => n.endsWith('.md'))) {
+      // Look for a relative link from SKILL.md to the reference file.
+      // Accept both `references/<file>.md` and `./references/<file>.md`.
+      const pattern = new RegExp(`references[\\\\/]${ref.replace('.', '\\.')}`);
+      if (!pattern.test(skillContent)) {
+        record(warnings, join(refsDir, ref), 'orphan-reference', `References file is not linked from skills/${t.name}/SKILL.md`);
+      }
+    }
+  }
+}
+validateOrphanReferences();
 
 if (existsSync(AGENTS_DIR)) {
   for (const name of readdirSync(AGENTS_DIR).filter(n => n.endsWith('.md'))) {

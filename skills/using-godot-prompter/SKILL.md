@@ -87,7 +87,12 @@ Implementation plans and design docs are saved to `docs/godot-prompter/plans/` a
 
 ## Platform Adaptation
 
-Skills use Claude Code tool names as the canonical reference. Non-Claude platforms: see the appropriate tool mapping file in `references/` for your platform's equivalents.
+Skills use Claude Code tool names as the canonical reference. Non-Claude platforms: see the appropriate tool mapping file in `references/` for your platform's equivalents:
+
+- [`references/copilot-tools.md`](references/copilot-tools.md) — GitHub Copilot CLI
+- [`references/codex-tools.md`](references/codex-tools.md) — Codex
+- [`references/cursor-tools.md`](references/cursor-tools.md) — Cursor
+- [`references/gemini-tools.md`](references/gemini-tools.md) — Gemini CLI (Gemini also auto-loads this via `GEMINI.md`)
 
 ## Available Skill Categories
 
