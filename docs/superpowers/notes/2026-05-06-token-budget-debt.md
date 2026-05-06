@@ -32,20 +32,29 @@ The structural recipe is the same for every restructure:
 
 Plus the new **`gdscript-advanced`** skill ships with 3 references at 9.8 KB SKILL.md (born under budget).
 
-## Deferred (count: 24)
+## v1.7.1 progress (2026-05-07)
+
+10 more skills restructured to Pattern X (next 10 heaviest from the deferred list):
+
+| Skill | Before | After | Reference files |
+|---|---:|---:|---:|
+| `input-handling` | 27 KB | 14.5 KB | 4 |
+| `dialogue-system` | 26 KB | 10.6 KB | 5 |
+| `multiplayer-sync` | 26 KB | 10.4 KB | 4 |
+| `shader-basics` | 26 KB | 15.5 KB | 5 |
+| `godot-debugging` | 26 KB | 12.0 KB | 4 |
+| `particles-vfx` | 25 KB | 14.2 KB | 5 |
+| `procedural-generation` | 24 KB | 4.9 KB | 4 |
+| `multiplayer-basics` | 24 KB | 15.6 KB | 3 |
+| `xr-development` | 24 KB | 15.0 KB | 5 |
+| `2d-essentials` | 24 KB | 8.6 KB | 5 |
+
+Validator: 56 → 42 warnings (10 token-budget closures + 4 incidental C# parity closures as sections moved to references along with their already-paired C# blocks).
+
+## Deferred (count: 14)
 
 Listed largest-first. Each entry suggests a natural cut. v1.7.x releases pick rows off this list.
 
-- `skills/input-handling/SKILL.md` (~27 KB) — InputEvent deep dive, action rebinding UI, gamepad/touch deep dives → `references/`
-- `skills/dialogue-system/SKILL.md` (~26 KB) — branching/conditions, UI presentation, external formats → `references/`
-- `skills/multiplayer-sync/SKILL.md` (~26 KB) — interpolation, prediction, lag compensation deep dives → `references/`
-- `skills/shader-basics/SKILL.md` (~26 KB) — Compositor effects, Stencil buffer, SMAA, Shader Baker deep dives → `references/`
-- `skills/godot-debugging/SKILL.md` (~26 KB) — remote debugger, signal tracing, common error catalog → `references/`
-- `skills/particles-vfx/SKILL.md` (~25 KB) — emission shapes, subemitters deep dive, trails, attractors, collision → `references/`
-- `skills/procedural-generation/SKILL.md` (~24 KB) — noise/BSP/cellular/WFC algorithms each become a reference
-- `skills/multiplayer-basics/SKILL.md` (~24 KB) — ENet/WebSocket, RPC patterns, authority deep dives → `references/`
-- `skills/xr-development/SKILL.md` (~24 KB) — OpenXR setup, hand tracking, controllers, passthrough deep dives → `references/`
-- `skills/2d-essentials/SKILL.md` (~24 KB) — TileMap deep dive, parallax, custom drawing → `references/`
 - `skills/gdscript-patterns/SKILL.md` (~23 KB) — keep examples concise; consider moving the longest sections (variadic, abstract) into a `references/` if they grow with future Godot versions
 - `skills/tween-animation/SKILL.md` (~22 KB) — easing recipes, parallel sequences, common UI/gameplay motion → `references/`
 - `skills/save-load/SKILL.md` (~22 KB) — ConfigFile/JSON/Resource patterns, version migration recipes → `references/`

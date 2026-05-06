@@ -4,6 +4,27 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.1] - 2026-05-07
+
+### Changed
+
+- 10 more skills restructured to **Pattern X** (core SKILL.md + `references/<topic>.md`) — the next 10 heaviest from the v1.7.0 token-budget debt list:
+  - `input-handling` (27 → 14.5 KB) — 4 references: mouse, gamepad, touch, action-rebinding
+  - `dialogue-system` (26 → 10.6 KB) — 5 references: dialogue-manager, branching-and-conditions, ui-presentation, external-formats, variable-interpolation
+  - `multiplayer-sync` (26 → 10.4 KB) — 4 references: interpolation, client-prediction, lag-compensation, bandwidth-optimization
+  - `shader-basics` (26 → 15.5 KB) — 5 references: 2d-shader-recipes, 3d-shader-recipes, post-processing, compositor-effects, stencil-buffer
+  - `godot-debugging` (26 → 12.0 KB) — 4 references: signal-tracing, performance-debugging, scene-tree-debugging, systematic-method
+  - `particles-vfx` (25 → 14.2 KB) — 5 references: vfx-recipes, trails, subemitters, attractors-and-collision, flipbook-animation (v1.6.0 C# parity preserved in references)
+  - `procedural-generation` (24 → 4.9 KB) — 4 references: noise-generation, bsp-dungeons, cellular-automata, wave-function-collapse
+  - `multiplayer-basics` (24 → 15.6 KB) — 3 references: spawning-networked-objects, player-join-flow, disconnect-handling
+  - `xr-development` (24 → 15.0 KB) — 5 references: controllers-and-input, hand-tracking, grabbing-objects, xr-ui, passthrough
+  - `2d-essentials` (24 → 8.6 KB) — 5 references: tilemap, parallax, lights-and-shadows, 2d-particles, custom-drawing (v1.6.0 C# parity preserved inline for 2D Antialiasing)
+- 44 new reference files created across the 10 restructured skills
+- `docs/superpowers/notes/2026-05-06-token-budget-debt.md` — 24 → 14 deferred skills; v1.7.1 progress block added
+- `docs/token-budget.md` — regenerated to reflect post-restructure state
+
+> **Release notes:** Validator baseline at release: 0 errors, 42 warnings (14 deferred C# parity + 14 accepted GDScript-only + 14 token-budget). Down from 56 in v1.7.0. Token-budget warnings closed: 24 → 14 (10 restructures). Deferred C# parity warnings closed: 18 → 14 (4 incidental closures as sections moved to references along with their already-paired C# blocks). The 10 restructured skills now load 50-80% lighter into agent context. No new agents, no new skills — pure token-budget patch release. Repo-wide minimum stays at Godot 4.3+.
+
 ## [1.7.0] - 2026-05-06
 
 ### Added
