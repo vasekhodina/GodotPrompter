@@ -101,6 +101,10 @@ jobs:
           set -euo pipefail
           V="${VERSION#v}"
           BRANCH="bump/godot-prompter-$V"
+          # Configure git to use gh's credential helper so `git push` finds the token.
+          # Without this, `gh repo clone` works (gh reads GH_TOKEN directly) but
+          # `git push` falls back to interactive auth and fails in CI.
+          gh auth setup-git
           gh repo clone jame581/skillsmith /tmp/skillsmith
           cd /tmp/skillsmith
           git config user.name "godot-prompter-bot"
@@ -130,6 +134,8 @@ jobs:
           set -euo pipefail
           V="${VERSION#v}"
           BRANCH="bump/godot-prompter-$V"
+          # Configure git to use gh's credential helper so `git push` finds the token.
+          gh auth setup-git
           gh repo clone jame581/godot-prompter-marketplace /tmp/legacy
           cd /tmp/legacy
           git config user.name "godot-prompter-bot"
