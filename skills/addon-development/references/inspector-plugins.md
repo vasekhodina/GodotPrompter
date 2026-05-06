@@ -243,5 +243,64 @@ func _exit_tree() -> void:
     EditorInterface.get_resource_previewer().remove_preview_generator(_preview_gen)
 ```
 
+### C#
+
+```csharp
+// res://addons/my_plugin/ItemResourcePicker.cs
+#if TOOLS
+using Godot;
+
+[Tool]
+public partial class ItemResourcePicker : EditorResourcePicker
+{
+    public ItemResourcePicker()
+    {
+        BaseType = "ItemData";
+        EditableWarning = "Editing this Resource affects all scenes that reference it.";
+    }
+}
+
+// res://addons/my_plugin/ItemPreviewGenerator.cs
+[Tool]
+public partial class ItemPreviewGenerator : EditorResourcePreviewGenerator
+{
+    public override bool _Handles(string type)
+    {
+        return type == "ItemData";
+    }
+
+    public override Texture2D _Generate(Resource resource, Vector2I size, Godot.Collections.Dictionary metadata)
+    {
+        var item = resource as ItemData;
+        if (item?.Icon == null)
+            return null;
+
+        // Return a thumbnail; the editor will cache it.
+        return item.Icon;
+    }
+
+    public override bool _GenerateSmallPreview()
+    {
+        return true; // also generate the small preview shown in lists
+    }
+}
+#endif
+
+// Register both from your main EditorPlugin (Plugin.cs):
+//
+// #if TOOLS
+// public override void _EnterTree()
+// {
+//     _previewGen = new ItemPreviewGenerator();
+//     EditorInterface.Singleton.GetResourcePreviewer().AddPreviewGenerator(_previewGen);
+// }
+//
+// public override void _ExitTree()
+// {
+//     EditorInterface.Singleton.GetResourcePreviewer().RemovePreviewGenerator(_previewGen);
+// }
+// #endif
+```
+
 ---
 
