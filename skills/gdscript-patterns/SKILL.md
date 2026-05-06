@@ -307,68 +307,9 @@ match enemy_type:
 
 ## 5. Export Annotations
 
-### Basic Exports
+`@export` exposes a variable to the Inspector. Hint variants (`@export_range`, `@export_enum`, `@export_file`) constrain editor input. Use `@export_group` and `@export_subgroup` to organize. Node and Resource exports use NodePath / typed Resource references.
 
-```gdscript
-@export var speed: float = 200.0
-@export var health: int = 100
-@export var player_name: String = "Hero"
-@export var color: Color = Color.WHITE
-@export var texture: Texture2D
-@export var scene: PackedScene
-```
-
-### Range and Hints
-
-```gdscript
-@export_range(0.0, 100.0, 0.5) var volume: float = 50.0
-@export_range(1, 10) var level: int = 1
-@export_range(0.0, 1.0, 0.01, "or_greater") var scale: float = 1.0
-
-@export_multiline var description: String = ""
-@export_file("*.tscn") var level_path: String
-@export_dir var save_directory: String
-@export_color_no_alpha var outline_color: Color
-
-# Enum export — creates dropdown in Inspector
-@export_enum("Sword", "Bow", "Staff") var weapon: int = 0
-# Or use a real enum:
-enum Weapon { SWORD, BOW, STAFF }
-@export var weapon_type: Weapon = Weapon.SWORD
-```
-
-### Export Groups
-
-```gdscript
-@export_group("Movement")
-@export var speed: float = 200.0
-@export var acceleration: float = 1500.0
-@export var friction: float = 1200.0
-
-@export_group("Combat")
-@export var attack_damage: int = 10
-@export var attack_speed: float = 1.0
-
-@export_subgroup("Defense")
-@export var armor: int = 5
-@export var dodge_chance: float = 0.1
-
-@export_category("Advanced Settings")
-@export var debug_mode: bool = false
-```
-
-### Node and Resource Exports
-
-```gdscript
-# Node references (assigned in editor by dragging)
-@export var target: Node2D
-@export var spawn_point: Marker2D
-@export var health_bar: ProgressBar
-
-# Array of nodes/resources
-@export var patrol_points: Array[Marker2D] = []
-@export var loot_table: Array[ItemResource] = []
-```
+> See [references/export-annotations.md](references/export-annotations.md) for the full export annotation catalog (basic exports, range/hint variants, groups, node and Resource exports).
 
 ---
 
@@ -417,170 +358,17 @@ func calculate_hit() -> HitResult:
 
 ## 7. super() in Virtual Methods
 
-In Godot 4, overridden virtual methods (`_ready()`, `_process()`, `_physics_process()`, `_enter_tree()`, `_exit_tree()`, etc.) do **not** automatically call the parent implementation. You must call `super()` explicitly if the parent class has logic in that method.
+When you override a virtual method that the engine calls (`_ready`, `_process`, `_input`, etc.) and your parent class also implements it, call `super()` to chain the parent's behavior. Forgetting to call `super._ready()` is the most common cause of "my base class init didn't run" bugs.
 
-### The Problem
-
-```gdscript
-# parent.gd
-class_name EnemyBase
-extends CharacterBody2D
-
-func _ready() -> void:
-    add_to_group("enemies")
-    $HealthComponent.health_depleted.connect(_on_health_depleted)
-
-# child.gd — BUG: parent _ready() never runs!
-extends EnemyBase
-
-func _ready() -> void:
-    $NavigationAgent2D.velocity_computed.connect(_on_velocity_computed)
-    # Parent's group registration and signal connection are LOST
-```
-
-### The Fix
-
-```gdscript
-# child.gd — CORRECT: call super() to run parent _ready()
-extends EnemyBase
-
-func _ready() -> void:
-    super()  # runs EnemyBase._ready() — group add + signal connect
-    $NavigationAgent2D.velocity_computed.connect(_on_velocity_computed)
-```
-
-### C#
-
-C# uses `base.MethodName()` — same concept:
-
-```csharp
-public partial class SpecialEnemy : EnemyBase
-{
-    public override void _Ready()
-    {
-        base._Ready(); // runs EnemyBase._Ready()
-        GetNode<NavigationAgent2D>("NavigationAgent2D").VelocityComputed += OnVelocityComputed;
-    }
-}
-```
-
-### When super() Is Required
-
-| Scenario | Call super()? |
-|----------|---------------|
-| Extending a **built-in** Godot class (Node, CharacterBody2D) | Not needed — engine handles internal callbacks |
-| Extending **your own** base class with logic in the virtual | **Yes — always** |
-| Extending a **third-party** class (addon, plugin) | **Yes — assume it has logic** |
-| Multiple inheritance levels (A → B → C) | Each level calls `super()` to chain up |
-
-### Common Bugs from Missing super()
-
-| Symptom | Likely Cause |
-|---------|-------------|
-| Child node doesn't join a group set in parent `_ready()` | Missing `super()` in child `_ready()` |
-| Signals connected in parent `_ready()` never fire | Missing `super()` — connections never made |
-| Parent animation logic stops working in child | Missing `super()` in child `_process()` or `_physics_process()` |
-| `@onready` vars in parent are null when child accesses them | Parent `_ready()` body never ran — those vars never initialized |
-
-> **Rule of thumb:** If you extend a script that you or someone else wrote (not a bare Godot class), always call `super()` as the first line of any overridden virtual method.
+> See [references/super-in-virtual-methods.md](references/super-in-virtual-methods.md) for the full pattern (problem / fix), the C# `base.X()` equivalent, and a catalog of bugs from missing super calls.
 
 ---
 
 ## 8. Common Idioms
 
-### Ternary Expression
+The recurring small patterns: ternary expressions (`value if cond else other`), printf-style string formatting (`"%s %d" % [a, b]`), null/empty checks (`is_instance_valid` vs `!= null`, empty Array/String checks), Dictionary access (`get(key, default)`), Array operations (`Array.has`, `Array.find`, `Array.has_all`), setget via `set` and `get` accessors.
 
-```gdscript
-var label := "alive" if health > 0 else "dead"
-var direction := -1 if facing_left else 1
-velocity.x = speed * (1.5 if sprinting else 1.0)
-```
-
-### String Formatting
-
-```gdscript
-# % operator (printf-style)
-var msg := "Player %s has %d HP" % [player_name, health]
-var formatted := "%.2f seconds" % elapsed_time
-
-# String interpolation — no built-in f-strings, use % or format()
-var text := "Score: %d / %d" % [current_score, max_score]
-```
-
-### Null / Empty Checks
-
-```gdscript
-# Check if a node reference is valid
-if is_instance_valid(target):
-    target.take_damage(10)
-
-# Check if a variable is null
-if weapon != null:
-    weapon.attack()
-
-# Shorthand for non-null (works because null is falsy)
-if weapon:
-    weapon.attack()
-
-# Check array/dictionary/string emptiness
-if inventory.is_empty():
-    show_empty_message()
-if not player_name.is_empty():
-    display_name(player_name)
-```
-
-### Dictionary Access Patterns
-
-```gdscript
-var stats: Dictionary = {"health": 100, "attack": 15, "defense": 8}
-
-# Safe access with default
-var hp: int = stats.get("health", 0)
-var missing: int = stats.get("magic", 0)  # returns 0, no error
-
-# Check existence
-if stats.has("attack"):
-    apply_damage(stats["attack"])
-
-# Merge dictionaries
-var defaults := {"health": 100, "attack": 10}
-var overrides := {"attack": 20, "speed": 5}
-defaults.merge(overrides, true)  # true = overwrite existing keys
-```
-
-### Useful Array Operations
-
-```gdscript
-var items: Array[String] = ["sword", "shield", "potion", "sword"]
-
-items.append("bow")              # add to end
-items.erase("sword")             # remove first occurrence
-items.has("shield")              # true
-items.find("potion")             # index or -1
-items.pick_random()              # random element
-items.shuffle()                  # randomize order
-items.reverse()                  # reverse in place
-items.slice(1, 3)                # sub-array [index 1 to 3)
-
-# Remove duplicates
-var unique: Array[String] = []
-for item in items:
-    if item not in unique:
-        unique.append(item)
-```
-
-### Setget / Properties
-
-```gdscript
-var health: int = 100:
-    set(value):
-        health = clampi(value, 0, max_health)
-        health_changed.emit(health)
-        if health == 0:
-            died.emit()
-    get:
-        return health
-```
+> See [references/common-idioms.md](references/common-idioms.md) for full code examples of each idiom.
 
 ---
 
@@ -626,114 +414,17 @@ var health: int = 100:
 
 ## 12. Variadic Functions (Godot 4.5+)
 
-Godot 4.5 adds variadic function support to GDScript. Append `...` before the last parameter name to collect all trailing arguments passed at the call site into an `Array`. This replaces patterns that required callers to pass an explicit array literal.
+Godot 4.5 added trailing-argument arrays via `...args`. The args are collected into an `Array`. Useful for printf-style helpers and flexible APIs without overloads.
 
-> **Note:** This skill is GDScript-specific by design. For C# patterns, see **csharp-godot** and **csharp-signals**.
-
-```gdscript
-# The ...args parameter collects any number of trailing arguments as an Array.
-func log_message(level: String, ...args: Array) -> void:
-    var text := " ".join(args.map(func(a) -> String: return str(a)))
-    print("[%s] %s" % [level, text])
-
-# Call with any number of trailing arguments — no array literal needed.
-log_message("INFO", "Player", "joined", "the", "game")
-log_message("WARN", "Health low:", current_health)
-
-
-# Variadic math helper
-func sum(...values: Array) -> float:
-    var total := 0.0
-    for v in values:
-        total += float(v)
-    return total
-
-print(sum(1, 2, 3, 4, 5))  # 15.0
-
-
-# Combine required parameters with variadic trailing args
-func spawn_enemies(scene: PackedScene, ...positions: Array) -> void:
-    for pos in positions:
-        var enemy: Node2D = scene.instantiate()
-        enemy.global_position = pos
-        add_child(enemy)
-
-spawn_enemies(enemy_scene,
-    Vector2(100, 200),
-    Vector2(300, 200),
-    Vector2(500, 200),
-)
-```
-
-> **Rules:** The variadic parameter must be the **last** parameter. It always arrives as a plain `Array` (not typed). A function may have at most one variadic parameter.
+> See [references/variadic-functions.md](references/variadic-functions.md) for the full syntax, common patterns, and notes on when to prefer overloads.
 
 ---
 
 ## 13. Abstract Classes and Methods (Godot 4.5+)
 
-The `@abstract` annotation prevents a class from being instantiated directly and forces subclasses to implement any method annotated with `@abstract`. This is the GDScript equivalent of C#'s `abstract` keyword.
+The `@abstract` annotation prevents direct instantiation of a class and forces subclasses to implement any `@abstract`-annotated method (similar to C#'s `abstract` keyword).
 
-> **Note:** This skill is GDScript-specific by design. For C# patterns, see **csharp-godot** and **csharp-signals**.
-
-```gdscript
-# base_enemy.gd — abstract base class; cannot be instantiated directly
-class_name BaseEnemy
-extends CharacterBody2D
-
-@abstract
-
-## Subclasses must implement this to define their attack behavior.
-@abstract func perform_attack() -> void
-
-## Subclasses must implement this to return their display name.
-@abstract func get_display_name() -> String
-
-# Non-abstract methods are fine — they provide shared behavior.
-func take_damage(amount: int) -> void:
-    health -= amount
-    if health <= 0:
-        die()
-
-func die() -> void:
-    print(get_display_name(), " has died")
-    queue_free()
-
-var health: int = 100
-```
-
-```gdscript
-# melee_enemy.gd — concrete subclass
-class_name MeleeEnemy
-extends BaseEnemy
-
-func perform_attack() -> void:
-    $HitboxArea.monitoring = true
-    await get_tree().create_timer(0.2).timeout
-    $HitboxArea.monitoring = false
-
-func get_display_name() -> String:
-    return "Melee Enemy"
-```
-
-```gdscript
-# ranged_enemy.gd — another concrete subclass
-class_name RangedEnemy
-extends BaseEnemy
-
-@export var projectile_scene: PackedScene
-
-func perform_attack() -> void:
-    var proj: Node2D = projectile_scene.instantiate()
-    proj.global_position = global_position
-    get_tree().root.add_child(proj)
-
-func get_display_name() -> String:
-    return "Ranged Enemy"
-```
-
-> **Instantiation guard:** GDScript raises an error at runtime if you call `BaseEnemy.new()` directly. The `@abstract` annotation on the class is the guard — no constructor override needed.
-
-> **Partial abstraction:** Only the methods annotated `@abstract` are required by subclasses. A class can be `@abstract` without any abstract methods (to signal "don't instantiate this directly") or can have abstract methods without the class-level annotation (each method still enforces implementation).
+> See [references/abstract-classes.md](references/abstract-classes.md) for full base-class patterns and subclass implementation rules.
 
 ---
 
