@@ -88,8 +88,85 @@ func _exit_tree() -> void:
 | `_parse_group(object, group)` | At each group header | — |
 | `_parse_property(...)` | Per property | `true` to hide default editor |
 
----
+### C#
 
+```csharp
+// res://addons/my_plugin/MyInspectorPlugin.cs
+#if TOOLS
+using Godot;
+
+[Tool]
+public partial class MyInspectorPlugin : EditorInspectorPlugin
+{
+    public override bool _CanHandle(GodotObject @object)
+    {
+        // Return true for the types this inspector should customize.
+        return @object is ItemData;
+    }
+
+    public override bool _ParseProperty(
+        GodotObject @object,
+        Variant.Type type,
+        string name,
+        PropertyHint hintType,
+        string hintString,
+        PropertyUsageFlags usageFlags,
+        bool wide)
+    {
+        // Inject a custom EditorProperty for the "icon" property of ItemData.
+        if (name == "icon")
+        {
+            AddPropertyEditor(name, new IconPreviewProperty());
+            return true; // we handled this property — skip default rendering
+        }
+        return false;
+    }
+}
+
+// res://addons/my_plugin/IconPreviewProperty.cs
+[Tool]
+public partial class IconPreviewProperty : EditorProperty
+{
+    private TextureRect _preview;
+
+    public IconPreviewProperty()
+    {
+        _preview = new TextureRect { ExpandMode = TextureRect.ExpandModeEnum.FitWidthProportional };
+        AddChild(_preview);
+        SetBottomEditor(_preview);
+    }
+
+    public override void _UpdateProperty()
+    {
+        var item = (ItemData)GetEditedObject();
+        _preview.Texture = item?.Icon;
+    }
+}
+#endif
+
+// Register in your main EditorPlugin (Plugin.cs):
+//
+// #if TOOLS
+// using Godot;
+//
+// [Tool]
+// public partial class Plugin : EditorPlugin
+// {
+//     private MyInspectorPlugin _inspector;
+//
+//     public override void _EnterTree()
+//     {
+//         _inspector = new MyInspectorPlugin();
+//         AddInspectorPlugin(_inspector);
+//     }
+//
+//     public override void _ExitTree()
+//     {
+//         RemoveInspectorPlugin(_inspector);
+//     }
+// }
+// #endif
+```
 
 ---
 
