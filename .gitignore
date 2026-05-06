@@ -17,6 +17,7 @@ export_presets.cfg
 
 # Build
 node_modules/
+package-lock.json
 
 # tests/plugin-test
 .claude/
