@@ -10,7 +10,15 @@ Also: section names in the camera-system and save-load entries were aligned with
 
 ---
 
-## Deferred (count: 23 — originally 33; 10 closed in v1.6.0; 1 missing entry added during v1.6.0 cleanup)
+## v1.7.0 progress (2026-05-06)
+
+4 medium-complexity sections closed by `godot-tools-engineer` in dogfood mode — all four `addon-development` deferred sections (Custom Inspector Plugin, Custom Resource Editors, Gizmos, Testing Plugins). With this, **`addon-development` becomes the first skill in the repo with fully closed C# parity.** Three of the four landed in `references/` (post-restructure) and one (Testing Plugins) stayed in core SKILL.md.
+
+Validator deferred-parity warning count: 23 → 19. Token-budget warning count: 35 → 24 (the top-10 plus `addon-development` were restructured this release; remaining 24 over-budget skills tracked in the new `2026-05-06-token-budget-debt.md`).
+
+---
+
+## Deferred (count: 19 — originally 33; 10 closed in v1.6.0; 4 closed in v1.7.0; 1 missing entry added during v1.6.0 cleanup)
 
 These sections have GDScript code but no C# block. Each entry notes what kind of C# would belong so a future author can pick up any single item in isolation.
 
@@ -18,7 +26,7 @@ These sections have GDScript code but no C# block. Each entry notes what kind of
 - ~~`skills/addon-development/SKILL.md` — Section "4. Custom Inspector Plugin" — medium complexity; needs `EditorInspectorPlugin` subclass in C# with `#if TOOLS` guard, `_CanHandle`, `_ParseBegin`, `_ParseProperty` overrides, and the registration boilerplate in the `EditorPlugin` subclass~~ **(closed in v1.7.0)** — section moved to `references/inspector-plugins.md` during restructure
 - ~~`skills/addon-development/SKILL.md` — Section "6. Custom Resource Editors" — needs C# for `EditorResourcePicker` embedded in a dock tool control, and a `EditorResourcePreviewGenerator` subclass with `_Handles` and `_Generate` overrides; `#if TOOLS` guards throughout~~ **(closed in v1.7.0)** — section moved to `references/inspector-plugins.md` during restructure
 - ~~`skills/addon-development/SKILL.md` — Section "7. Gizmos" — needs C# `EditorNode3DGizmoPlugin` subclass with `_Init`, `_GetGizmoName`, `_HasGizmo`, `_Redraw`, `_GetHandleValue`, `_SetHandle`, `_CommitHandle`; complex undo/redo wiring; all under `#if TOOLS`~~ **(closed in v1.7.0)** — section moved to `references/gizmos-deep-dive.md` during restructure
-- `skills/addon-development/SKILL.md` — Section "8. Testing Plugins" — needs C# equivalent of the plugin reload snippet and `print()` → `GD.Print()` logging guidance; the lifecycle gotcha table should note C# compilation failures specifically
+- ~~`skills/addon-development/SKILL.md` — Section "8. Testing Plugins" — needs C# equivalent of the plugin reload snippet and `print()` → `GD.Print()` logging guidance; the lifecycle gotcha table should note C# compilation failures specifically~~ **(closed in v1.7.0)**
 - ~~`skills/audio-system/SKILL.md` — Section "4. Spatial Audio (2D & 3D)" — short C# note: `AudioStreamPlayer2D` / `AudioStreamPlayer3D` properties are identical in C#; `AudioListener2D`/`AudioListener3D.MakeCurrent()` pattern; medium length~~ **(closed in v1.6.0)**
 - `skills/camera-system/SKILL.md` — Section "5. Camera3D Patterns" — substantial: C# `SpringArm3D` subclass with `_UnhandledInput` and `_Process`, mouse delta accumulation, `TopLevel = true`; plus Orbit Camera variant
 - `skills/camera-system/SKILL.md` — Section "6. Camera Transitions" — medium: C# `CameraTransitionManager` class with async `Transition2D` / `Transition3D` methods using `Tween` and `await ToSignal`

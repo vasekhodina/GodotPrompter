@@ -249,6 +249,37 @@ func _enter_tree() -> void:
     push_error("[my_plugin] something failed")  # also shown as red in Output
 ```
 
+```csharp
+// C# equivalent — same Output panel, same OS console.
+#if TOOLS
+public override void _EnterTree()
+{
+    GD.Print("[my_plugin] _EnterTree called");      // Output panel
+    GD.PushWarning("[my_plugin] something unexpected");
+    GD.PushError("[my_plugin] something failed");   // also shown as red in Output
+}
+#endif
+```
+
+> **C# plugin reload caveat:** Unlike GDScript, C# plugins require recompilation. After editing C# plugin source, the editor must rebuild the assembly before re-enabling. If the plugin fails to load with `Could not find type "Plugin"`, the C# project failed to compile — check the **MSBuild Panel** at the bottom of the editor for compilation errors. Programmatic plugin reload from a `[Tool]` script:
+
+```csharp
+#if TOOLS
+[Tool]
+public partial class PluginReloader : EditorScript
+{
+    public override void _Run()
+    {
+        var pluginName = "my_plugin";
+        // Disable then re-enable to force a clean reload cycle.
+        EditorInterface.Singleton.SetPluginEnabled(pluginName, false);
+        EditorInterface.Singleton.SetPluginEnabled(pluginName, true);
+        GD.Print($"Plugin {pluginName} reloaded.");
+    }
+}
+#endif
+```
+
 To launch with the OS console visible on Windows:
 
 ```
