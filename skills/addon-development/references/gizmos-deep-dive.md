@@ -112,5 +112,97 @@ func _exit_tree() -> void:
     remove_node_3d_gizmo_plugin(_gizmo_plugin)
 ```
 
+### C#
+
+```csharp
+// res://addons/my_plugin/SpawnerGizmoPlugin.cs
+#if TOOLS
+using Godot;
+
+[Tool]
+public partial class SpawnerGizmoPlugin : EditorNode3DGizmoPlugin
+{
+    public SpawnerGizmoPlugin()
+    {
+        CreateMaterial("main", new Color(1, 0.5f, 0));
+        CreateHandleMaterial("handles");
+    }
+
+    public override string _GetGizmoName() => "Spawner3D";
+    public override bool _HasGizmo(Node3D forNode3D) => forNode3D is Spawner3D;
+
+    public override void _Redraw(EditorNode3DGizmo gizmo)
+    {
+        gizmo.Clear();
+        var spawner = (Spawner3D)gizmo.GetNode3D();
+
+        // Wireframe sphere for the spawn radius.
+        var lines = new Vector3[2 * 32];
+        float r = spawner.SpawnRadius;
+        for (int i = 0; i < 32; i++)
+        {
+            float a0 = i * Mathf.Tau / 32f;
+            float a1 = (i + 1) * Mathf.Tau / 32f;
+            lines[i * 2 + 0] = new Vector3(Mathf.Cos(a0) * r, 0, Mathf.Sin(a0) * r);
+            lines[i * 2 + 1] = new Vector3(Mathf.Cos(a1) * r, 0, Mathf.Sin(a1) * r);
+        }
+        gizmo.AddLines(lines, GetMaterial("main", gizmo));
+
+        // Single drag handle for the radius.
+        gizmo.AddHandles(
+            new[] { new Vector3(spawner.SpawnRadius, 0, 0) },
+            GetMaterial("handles", gizmo),
+            new[] { 0 });
+    }
+
+    public override Variant _GetHandleValue(EditorNode3DGizmo gizmo, int handleId, bool secondary)
+    {
+        return ((Spawner3D)gizmo.GetNode3D()).SpawnRadius;
+    }
+
+    public override void _SetHandle(EditorNode3DGizmo gizmo, int handleId, bool secondary, Camera3D camera, Vector2 screenPos)
+    {
+        var spawner = (Spawner3D)gizmo.GetNode3D();
+        var ray = camera.ProjectRayNormal(screenPos);
+        var origin = camera.ProjectRayOrigin(screenPos);
+        var plane = new Plane(spawner.GlobalTransform.Basis.Y, spawner.GlobalPosition);
+        var hit = plane.IntersectsRay(origin, ray);
+        if (hit.HasValue)
+        {
+            spawner.SpawnRadius = (hit.Value - spawner.GlobalPosition).Length();
+            gizmo.GetNode3D().UpdateGizmos();
+        }
+    }
+
+    public override void _CommitHandle(EditorNode3DGizmo gizmo, int handleId, bool secondary, Variant restore, bool cancel)
+    {
+        var spawner = (Spawner3D)gizmo.GetNode3D();
+        if (cancel) { spawner.SpawnRadius = (float)restore; return; }
+
+        // Wire to UndoRedo so the change is undoable.
+        var undoRedo = EditorPlugin.GetUndoRedo();
+        undoRedo.CreateAction("Set Spawner Radius");
+        undoRedo.AddDoProperty(spawner, "spawn_radius", spawner.SpawnRadius);
+        undoRedo.AddUndoProperty(spawner, "spawn_radius", restore);
+        undoRedo.CommitAction();
+    }
+}
+#endif
+
+// Register in your main EditorPlugin (Plugin.cs):
+//
+// #if TOOLS
+// public override void _EnterTree()
+// {
+//     _gizmoPlugin = new SpawnerGizmoPlugin();
+//     AddNode3DGizmoPlugin(_gizmoPlugin);
+// }
+// public override void _ExitTree()
+// {
+//     RemoveNode3DGizmoPlugin(_gizmoPlugin);
+// }
+// #endif
+```
+
 ---
 
