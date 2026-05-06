@@ -4,6 +4,33 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.0] - 2026-05-06
+
+### Added
+
+- `scripts/count-tokens.mjs` — byte-count + tokenizer-mode token measurement for skills, references, and agents
+- `docs/token-budget.md` — per-skill / per-agent token costs across Claude / GPT (cl100k_base)
+- **gdscript-advanced** skill — production-grade GDScript depth (8 sections: performance idioms, metaprogramming, `@tool` lifecycle, async pitfalls, signal/Callable trade-offs, profiler-driven idioms, common pitfalls); GDScript-only by design via the new validator allowlist
+- **godot-tools-engineer** agent — editor-plugin specialist (custom inspectors, gizmos, `@tool` scripts, plugin distribution); GDExtension explicitly out of scope (deferred to v1.8)
+- `docs/superpowers/notes/2026-05-06-token-budget-debt.md` — debt-tracking note for the 24 over-budget skills not restructured this release
+- **addon-development** — full C# parity for sections 4 / 6 / 7 / 8 (Custom Inspector Plugin, Custom Resource Editors, Gizmos, Testing Plugins); first skill in the repo with fully closed C# parity
+
+### Changed
+
+- `validate-skills.mjs` — three additions:
+  - `[token-budget-exceeded]` warning at 16 KB SKILL.md ceiling
+  - `[orphan-reference]` warning when a `references/*.md` file is not linked from its parent SKILL.md
+  - `GDSCRIPT_ONLY_BY_DESIGN` allowlist re-categorizes parity warnings for `gdscript-patterns` / `gdscript-advanced` from `csharp-parity-missing` (deferred debt) to `csharp-parity-accepted` (intentional)
+- 11 skills restructured using **Pattern X** (core SKILL.md + `references/<topic>.md`):
+  - Top 10 ≥ 28 KB: `godot-optimization` (37 → 11.5 KB), `ai-navigation` (37 → 15.6), `animation-system` (35 → 16.0), `3d-essentials` (35 → 15.9), `physics-system` (34 → 15.9), `dedicated-server` (31 → 11.4), `hud-system` (28 → 11.2), `inventory-system` (28 → 13.5), `audio-system` (28 → 13.6), `godot-ui` (27 → 13.7)
+  - `addon-development` (20 → 12.0 KB), restructured as part of the `godot-tools-engineer` dogfood
+- `godot-game-dev`, `godot-game-architect` — extended routing notes to cover `godot-tools-engineer`
+- `using-godot-prompter` — added explicit per-platform reference links (codex, copilot, cursor, gemini) to close orphan-reference warnings the new rule surfaces
+- 50 new reference files created across 11 restructured skills + the new `gdscript-advanced` skill
+- CONTRIBUTING.md release checklist now includes the `count-tokens.mjs --tokenizer --markdown` regeneration step before tagging
+
+> **Release notes:** Validator baseline at release: 0 errors, 56 warnings (19 deferred C# parity + 14 accepted GDScript-only + 24 token-budget − minor adjustments from the gdscript-only re-categorization). Up from 32 in v1.6.0 because the new budget rule surfaces existing debt that was previously invisible. The 11 restructured skills now load 50-60% lighter into agent context. Repo-wide minimum stays at Godot 4.3+. Agent count: 8 → 9. Skill count: 44 → 45. addon-development becomes the first skill in the repo with fully closed C# parity.
+
 ## [1.6.0] - 2026-05-02
 
 ### Added
