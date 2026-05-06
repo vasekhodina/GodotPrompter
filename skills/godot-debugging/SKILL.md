@@ -225,7 +225,7 @@ When prints, breakpoints, and remote inspection don't immediately reveal the bug
 
 ---
 
-## Implementation Checklist
+## 8. Implementation Checklist
 
 - [ ] Use `print_debug()` for verbose frame-level output that must not appear in release builds
 - [ ] Use `push_error()` / `push_warning()` (not `print()`) for invalid state and recoverable problems — they include stack traces
