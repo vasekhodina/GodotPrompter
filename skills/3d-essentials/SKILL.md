@@ -66,19 +66,7 @@ World (Node3D)
 
 ### Key StandardMaterial3D Properties
 
-| Property      | Type         | Description                                |
-|---------------|--------------|--------------------------------------------|
-| `albedo_color` | `Color`     | Base surface color                         |
-| `albedo_texture` | `Texture2D` | Diffuse/albedo texture map               |
-| `metallic`    | `float`      | 0.0 (dielectric) to 1.0 (metal)           |
-| `roughness`   | `float`      | 0.0 (mirror) to 1.0 (matte)               |
-| `emission`    | `Color`      | Self-illumination color                    |
-| `emission_energy_multiplier` | `float` | Emission brightness             |
-| `normal_map`  | `Texture2D`  | Surface detail without extra geometry      |
-| `ao_texture`  | `Texture2D`  | Ambient occlusion map                      |
-| `heightmap_texture` | `Texture2D` | Ray-marched parallax depth illusion   |
-| `rim`         | `float`      | Edge lighting (micro-fur scattering)       |
-| `clearcoat`   | `float`      | Transparent secondary coat (car paint)     |
+The PBR core: `albedo_color` / `albedo_texture` (base color), `metallic` (0 dielectric → 1 metal), `roughness` (0 mirror → 1 matte), `normal_map` (surface detail), `ao_texture` (ambient occlusion). Add `emission` + `emission_energy_multiplier` for self-illumination, `heightmap_texture` for parallax, `rim` / `clearcoat` for material flair.
 
 ### Transparency Modes
 
@@ -90,69 +78,11 @@ World (Node3D)
 | Alpha Hash          | Medium      | Yes     | Dithered transparency (hair)     |
 | Depth Pre-Pass      | Medium      | Partial | Mostly opaque with transparent edges |
 
-### Setting Materials from Code
+### Setting Materials from Code & Material Instancing
 
-#### GDScript
+Create a `StandardMaterial3D` at runtime, assign to `mesh.material_override`, and drive emissive flashes via Tween. Use `.duplicate()` to make per-instance copies so changing one mesh's material doesn't affect others.
 
-```gdscript
-@onready var mesh: MeshInstance3D = $MeshInstance3D
-
-func _ready() -> void:
-    var mat := StandardMaterial3D.new()
-    mat.albedo_color = Color(0.8, 0.2, 0.2)
-    mat.metallic = 0.3
-    mat.roughness = 0.7
-    mesh.material_override = mat
-
-func flash_emissive() -> void:
-    var mat: StandardMaterial3D = mesh.material_override
-    mat.emission_enabled = true
-    mat.emission = Color.WHITE
-    mat.emission_energy_multiplier = 3.0
-    var tween := create_tween()
-    tween.tween_property(mat, "emission_energy_multiplier", 0.0, 0.3)
-    tween.tween_callback(func(): mat.emission_enabled = false)
-```
-
-#### C#
-
-```csharp
-private MeshInstance3D _mesh;
-
-public override void _Ready()
-{
-    _mesh = GetNode<MeshInstance3D>("MeshInstance3D");
-    var mat = new StandardMaterial3D();
-    mat.AlbedoColor = new Color(0.8f, 0.2f, 0.2f);
-    mat.Metallic = 0.3f;
-    mat.Roughness = 0.7f;
-    _mesh.MaterialOverride = mat;
-}
-
-public void FlashEmissive()
-{
-    var mat = _mesh.MaterialOverride as StandardMaterial3D;
-    mat.EmissionEnabled = true;
-    mat.Emission = Colors.White;
-    mat.EmissionEnergyMultiplier = 3.0f;
-    var tween = CreateTween();
-    tween.TweenProperty(mat, "emission_energy_multiplier", 0.0f, 0.3);
-    tween.TweenCallback(Callable.From(() => mat.EmissionEnabled = false));
-}
-```
-
-### Material Instancing
-
-When multiple MeshInstance3D nodes share the same material, changing one affects all. To make a per-instance copy:
-
-```gdscript
-# In _ready() — creates an independent copy of the material
-mesh.material_override = mesh.material_override.duplicate()
-```
-
-```csharp
-_mesh.MaterialOverride = (Material)_mesh.MaterialOverride.Duplicate();
-```
+> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md) for the full GDScript and C# recipes (basic material setup, emissive flash, per-instance duplicate, dynamic OmniLight3D explosion).
 
 ---
 
@@ -170,71 +100,33 @@ _mesh.MaterialOverride = (Material)_mesh.MaterialOverride.Duplicate();
 
 ### Light Properties
 
-#### GDScript
+| Property | Type | Default | Notes |
+|---|---|---|---|
+| `light_color` | `Color` | white | Drive day/night with a Tween or `Environment.sun_position` |
+| `light_energy` | `float` | 1.0 | HDR; values >1 are valid |
+| `shadow_enabled` | `bool` | false | Big perf hit when enabled |
+| `directional_shadow_mode` | enum | 4 splits | `ORTHOGONAL` / `PARALLEL_2_SPLITS` / `PARALLEL_4_SPLITS` |
+| `directional_shadow_max_distance` | `float` | 100 m | Lower = sharper shadows |
 
 ```gdscript
-@onready var sun: DirectionalLight3D = $DirectionalLight3D
-
-func _ready() -> void:
-    sun.light_color = Color(1.0, 0.95, 0.9)
-    sun.light_energy = 1.0
-    sun.shadow_enabled = true
-
-    # Directional shadow quality
-    sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-    sun.directional_shadow_max_distance = 100.0
+sun.light_color = Color(1.0, 0.95, 0.9)
+sun.shadow_enabled = true
+sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+sun.directional_shadow_max_distance = 100.0
 ```
 
-#### C#
-
 ```csharp
-private DirectionalLight3D _sun;
-
-public override void _Ready()
-{
-    _sun = GetNode<DirectionalLight3D>("DirectionalLight3D");
-    _sun.LightColor = new Color(1.0f, 0.95f, 0.9f);
-    _sun.LightEnergy = 1.0f;
-    _sun.ShadowEnabled = true;
-
-    _sun.DirectionalShadowMode = DirectionalLight3D.ShadowMode.Parallel4Splits;
-    _sun.DirectionalShadowMaxDistance = 100.0f;
-}
+sun.LightColor = new Color(1.0f, 0.95f, 0.9f);
+sun.ShadowEnabled = true;
+sun.DirectionalShadowMode = DirectionalLight3D.ShadowMode.Parallel4Splits;
+sun.DirectionalShadowMaxDistance = 100.0f;
 ```
 
 ### Dynamic Point Light
 
-```gdscript
-func create_explosion_light(pos: Vector3) -> void:
-    var light := OmniLight3D.new()
-    light.light_color = Color(1.0, 0.6, 0.2)
-    light.light_energy = 4.0
-    light.omni_range = 10.0
-    light.omni_attenuation = 2.0
-    light.position = pos
-    add_child(light)
+Spawn an `OmniLight3D` at runtime, drive its energy with a tween, queue-free on completion. Common for explosions, muzzle flashes, magic effects.
 
-    var tween := create_tween()
-    tween.tween_property(light, "light_energy", 0.0, 0.5)
-    tween.tween_callback(light.queue_free)
-```
-
-```csharp
-public void CreateExplosionLight(Vector3 pos)
-{
-    var light = new OmniLight3D();
-    light.LightColor = new Color(1.0f, 0.6f, 0.2f);
-    light.LightEnergy = 4.0f;
-    light.OmniRange = 10.0f;
-    light.OmniAttenuation = 2.0f;
-    light.Position = pos;
-    AddChild(light);
-
-    var tween = CreateTween();
-    tween.TweenProperty(light, "light_energy", 0.0f, 0.5);
-    tween.TweenCallback(Callable.From(light.QueueFree));
-}
-```
+> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#dynamic-point-light) for the full GDScript and C# recipe.
 
 ### Shadow Configuration Tips
 
@@ -258,579 +150,62 @@ public void CreateExplosionLight(Vector3 pos)
 
 ## 4. Environment & Post-Processing
 
-### WorldEnvironment Setup
+Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL/SDFGI, depth-of-field — through a `WorldEnvironment` node holding an `Environment` resource. Pick a tonemap (`Linear`, `Reinhard`, `Filmic`, `ACES`, or `AgX`) on the Environment resource. Forward+ enables SSAO, SSIL, SSR, and SDFGI; mobile/compatibility renderers omit these.
 
-```
-World (Node3D)
-├── WorldEnvironment     ← holds Environment + CameraAttributes resources
-├── DirectionalLight3D
-├── Camera3D
-└── ...
-```
-
-Set the **Environment** resource on WorldEnvironment and the **Camera Attributes** for exposure/DOF.
-
-### Sky Options
-
-| Sky Material           | Description                              | Use For                    |
-|------------------------|------------------------------------------|----------------------------|
-| `PanoramaSkyMaterial`  | 360° HDR panorama image                 | Realistic environments     |
-| `ProceduralSkyMaterial` | Generated sky with color gradients     | Quick prototyping          |
-| `PhysicalSkyMaterial`  | Physics-based atmosphere + sun          | Outdoor day/night cycles   |
-
-#### GDScript
-
-```gdscript
-func setup_environment() -> void:
-    var env := Environment.new()
-
-    # Sky
-    var sky := Sky.new()
-    var sky_mat := ProceduralSkyMaterial.new()
-    sky_mat.sky_top_color = Color(0.4, 0.6, 1.0)
-    sky_mat.sky_horizon_color = Color(0.7, 0.8, 1.0)
-    sky_mat.ground_bottom_color = Color(0.2, 0.15, 0.1)
-    sky.sky_material = sky_mat
-    env.sky = sky
-    env.background_mode = Environment.BG_SKY
-
-    # Tonemap
-    env.tonemap_mode = Environment.TONE_MAP_FILMIC
-    env.tonemap_exposure = 1.0
-
-    # Ambient light from sky
-    env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-
-    $WorldEnvironment.environment = env
-```
-
-#### C#
-
-```csharp
-public void SetupEnvironment()
-{
-    var env = new Godot.Environment();
-
-    var sky = new Sky();
-    var skyMat = new ProceduralSkyMaterial();
-    skyMat.SkyTopColor = new Color(0.4f, 0.6f, 1.0f);
-    skyMat.SkyHorizonColor = new Color(0.7f, 0.8f, 1.0f);
-    skyMat.GroundBottomColor = new Color(0.2f, 0.15f, 0.1f);
-    sky.SkyMaterial = skyMat;
-    env.Sky = sky;
-    env.BackgroundMode = Godot.Environment.BGMode.Sky;
-
-    env.TonemapMode = Godot.Environment.ToneMapper.Filmic;
-    env.TonemapExposure = 1.0f;
-
-    env.AmbientLightSource = Godot.Environment.AmbientSource.Sky;
-
-    GetNode<WorldEnvironment>("WorldEnvironment").Environment = env;
-}
-```
-
-### Tonemap Modes
-
-| Mode       | Character                                  | Best For                       |
-|------------|---------------------------------------------|--------------------------------|
-| Linear     | Clips brights — blown-out look             | Debug, deliberately flat look  |
-| Reinhard   | Simple curve, preserves brights            | General use                    |
-| Filmic     | Film-like contrast                          | Cinematic games                |
-| ACES       | High contrast with desaturation            | Realistic/photographic         |
-| AgX        | Maintains hue as brightness increases      | Physically accurate lighting   |
-
-### Post-Processing Effects (Inspector)
-
-Configure these on the Environment resource — no shader code needed:
-
-| Effect    | Description                              | Renderer Support         |
-|-----------|------------------------------------------|--------------------------|
-| Glow      | Bloom/glow on bright surfaces            | All                      |
-| SSAO      | Screen-space ambient occlusion           | Forward+ only            |
-| SSIL      | Screen-space indirect lighting           | Forward+ only            |
-| SSR       | Screen-space reflections                 | Forward+ only            |
-| SDFGI     | Real-time GI for large scenes            | Forward+ only            |
-| DOF       | Depth of field blur (via CameraAttributes) | All                   |
-| Fog       | Depth and height fog                     | All                      |
-| Adjustments | Brightness, contrast, saturation, color correction | All          |
-| Auto Exposure | Adaptive exposure (via CameraAttributes) | Forward+, Mobile     |
-
-### Glow Pipeline and AgX Controls (Godot 4.6+)
-
-Godot 4.6 changes the order of the post-processing pipeline: **Glow now runs before tonemapping** (previously it ran after). This is physically more correct — glow should operate on HDR values before they are tone-mapped to LDR. The result is that bright emissive surfaces produce more natural-looking bloom.
-
-**Upgrade impact:** Projects upgrading from 4.5 to 4.6 may notice a visible change in glow appearance. If your glow looks more intense or differently colored after upgrading, re-tune `glow_intensity`, `glow_bloom`, and `glow_hdr_threshold` on your Environment resource.
-
-Godot 4.6 also adds two new controls to the **AgX** tonemapper:
-
-| Property | Description |
-|----------|-------------|
-| `tonemap_white` | White point — the luminance at which the scene clips to pure white |
-| `tonemap_contrast` | Contrast of the AgX sigmoid curve |
-
-```gdscript
-var env: Environment = $WorldEnvironment.environment
-env.tonemap_mode = Environment.TONE_MAP_AGX
-# New AgX controls (Godot 4.6+)
-env.tonemap_white = 1.0       # default; increase for brighter highlights
-env.tonemap_contrast = 1.0    # default; increase for more contrast
-```
-
-```csharp
-var env = GetNode<WorldEnvironment>("WorldEnvironment").Environment;
-env.TonemapMode = Godot.Environment.ToneMapper.Agx;
-// New AgX controls (Godot 4.6+)
-env.TonemapWhite = 1.0f;
-env.TonemapContrast = 1.0f;
-```
-
-> **When to use AgX:** AgX maintains hue as brightness increases, which avoids the "neon burn" artefact common with ACES on saturated emissives. The new `white` and `contrast` controls let you match a specific look reference.
-
-### Screen-Space Reflections — Quality Upgrade (Godot 4.6+)
-
-SSR in Godot 4.6 has been redesigned for higher quality at reduced GPU cost. The WorldEnvironment SSR settings (`ssr_enabled`, `ssr_max_steps`, `ssr_fade_in`, `ssr_fade_out`, `ssr_depth_tolerance`) remain unchanged — the improvement is automatic for all existing projects that upgrade to 4.6.
-
-If you previously disabled SSR due to performance concerns, it is worth re-enabling after upgrading to 4.6 and re-profiling.
-
----
+> See [references/environment-and-post.md](references/environment-and-post.md) for the full setup recipes (sky options, tonemap modes, all post-processing effects, the 4.6+ glow-before-tonemapping pipeline change, AgX `tonemap_white` / `tonemap_contrast` controls, and the 4.6+ SSR quality upgrade).
 
 ## 5. Global Illumination
 
-### GI Methods Comparison
+Five GI options trade quality for cost: none (ambient only) → ReflectionProbe (localized) → LightmapGI (best quality, baked) → VoxelGI (small/medium dynamic) → SDFGI (large open-world). VoxelGI/SDFGI/LightmapGI require Forward+. The 4.5+ subsections below (Specular Occlusion, Bent Normal Maps) stay inline because they apply across GI methods.
 
-| Method          | Quality   | Performance | Dynamic | Renderer  | Use For                    |
-|-----------------|-----------|-------------|---------|-----------|----------------------------|
-| None (ambient)  | Low       | Free        | Yes     | All       | Simple/stylized games      |
-| `ReflectionProbe` | Medium  | Low         | Optional | All      | Localized reflections      |
-| `LightmapGI`   | High      | Free at runtime | No   | Forward+  | Static scenes (archviz)    |
-| `VoxelGI`       | High      | High        | Yes     | Forward+  | Small-medium dynamic scenes |
-| `SDFGI`         | Medium-High | Medium    | Yes     | Forward+  | Large open-world scenes    |
-
-### ReflectionProbe
-
-Captures the surrounding environment into a cubemap for reflections on nearby objects.
-
-```
-Room (Node3D)
-├── ReflectionProbe      ← extents cover the room
-├── MeshInstance3D (walls)
-└── MeshInstance3D (shiny floor)
-```
-
-```gdscript
-@onready var probe: ReflectionProbe = $ReflectionProbe
-
-func _ready() -> void:
-    probe.size = Vector3(10.0, 4.0, 10.0)  # cover the room
-    probe.update_mode = ReflectionProbe.UPDATE_ONCE  # bake once, free at runtime
-```
-
-```csharp
-public override void _Ready()
-{
-    var probe = GetNode<ReflectionProbe>("ReflectionProbe");
-    probe.Size = new Vector3(10.0f, 4.0f, 10.0f);
-    probe.UpdateMode = ReflectionProbe.UpdateModeEnum.Once;
-}
-```
-
-### LightmapGI (Baked)
-
-Best quality, zero runtime cost. Requires UV2 on meshes (auto-generated on import).
-
-1. Add a **LightmapGI** node to the scene
-2. Set all static lights to **Bake Mode: Static**
-3. Set all static meshes to **GI Mode: Static** in the GeometryInstance3D section
-4. Select LightmapGI → click **Bake Lightmaps** in the toolbar
-5. Baked data is saved as a `LightmapGIData` resource — commit it with your project
-
-### SDFGI (Real-Time)
-
-Enable on the Environment resource — no nodes needed:
-
-```gdscript
-var env: Environment = $WorldEnvironment.environment
-env.sdfgi_enabled = true
-env.sdfgi_cascades = 4
-env.sdfgi_use_occlusion = true
-```
-
-```csharp
-var env = GetNode<WorldEnvironment>("WorldEnvironment").Environment;
-env.SdfgiEnabled = true;
-env.SdfgiCascades = 4;
-env.SdfgiUseOcclusion = true;
-```
+> See [references/global-illumination.md](references/global-illumination.md) for the methods comparison table, ReflectionProbe scene + code recipe, LightmapGI bake workflow, and SDFGI configuration.
 
 ### Specular Occlusion from Ambient Light (Godot 4.5+)
 
-Godot 4.5 automatically computes specular occlusion from the ambient light probe when baked global illumination (SDFGI, VoxelGI, or LightmapGI) is active. This prevents unrealistically bright specular highlights in areas that receive little or no indirect light — a common artifact when GI and specular are not coordinated.
-
-No API change is required. The improvement is automatic whenever a GI method that bakes an irradiance probe is enabled:
-
-| GI Method | Specular Occlusion |
-|-----------|-------------------|
-| None / ambient color only | No specular occlusion |
-| ReflectionProbe | No specular occlusion |
-| **LightmapGI** | Automatic (Godot 4.5+) |
-| **VoxelGI** | Automatic (Godot 4.5+) |
-| **SDFGI** | Automatic (Godot 4.5+) |
-
-> **When to use:** If your scene uses LightmapGI, VoxelGI, or SDFGI and has metallic or low-roughness surfaces, upgrade to 4.5 and re-bake to see improved specular quality in occluded areas (under eaves, inside crevices, in corners).
-
-C# uses the same GI API — specular occlusion is renderer-driven and requires no code change.
+Godot 4.5+ automatically computes specular occlusion from the ambient light probe when **LightmapGI**, **VoxelGI**, or **SDFGI** is active. Prevents unrealistically bright speculars in areas that receive little indirect light (under eaves, inside crevices, in corners). No API change — re-bake after upgrading to see the improvement on metallic / low-roughness surfaces. ReflectionProbe alone does not provide specular occlusion.
 
 ### Bent Normal Maps (Godot 4.5+)
 
 Bent normal maps encode the mean unoccluded direction from each texel — the average direction toward open sky across the hemisphere. When assigned to the **Bent Normal** slot on `StandardMaterial3D`, Godot uses this information to improve indirect lighting directionality and specular occlusion accuracy. The result is more realistic ambient lighting on complex surfaces like cloth, carved stone, or organic shapes.
 
-**Inspector setup:**
+**Inspector setup:** In `StandardMaterial3D`, enable **Bent Normal** → assign your tangent-space bent normal texture (baked from Marmoset, Substance, or xNormal).
 
-1. In `StandardMaterial3D`, enable **Bent Normal** → assign your bent normal texture
-2. The texture should be in tangent space (standard baked format from Marmoset, Substance, or xNormal)
+> **Most visible on:** materials that combine low roughness or high metallic values with baked GI (LightmapGI / VoxelGI / SDFGI). On fully rough dielectric surfaces the benefit is subtler. Use on hero assets; skip on background geometry.
 
-```gdscript
-@onready var mesh: MeshInstance3D = $MeshInstance3D
-
-func _ready() -> void:
-    var mat := mesh.get_surface_override_material(0) as StandardMaterial3D
-    if mat == null:
-        mat = StandardMaterial3D.new()
-    mat.bent_normal_enabled = true
-    mat.bent_normal_texture = preload("res://textures/rock_bent_normal.png")
-    mesh.set_surface_override_material(0, mat)
-```
-
-```csharp
-private MeshInstance3D _mesh;
-
-public override void _Ready()
-{
-    _mesh = GetNode<MeshInstance3D>("MeshInstance3D");
-    var mat = _mesh.GetSurfaceOverrideMaterial(0) as StandardMaterial3D
-        ?? new StandardMaterial3D();
-    mat.BentNormalEnabled = true;
-    mat.BentNormalTexture = GD.Load<Texture2D>("res://textures/rock_bent_normal.png");
-    _mesh.SetSurfaceOverrideMaterial(0, mat);
-}
-```
-
-> **Note:** Bent normal maps have the most visible impact on materials that combine low roughness or high metallic values with baked GI. On fully rough dielectric surfaces the benefit is subtler.
-
-> **When to use:** Use bent normals on hero assets (characters, key props) where you have the budget to bake them. Skip them on background geometry.
+> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md) for the runtime-assignment GDScript + C# code path (the Inspector setup above is the typical case).
 
 ---
 
 ## 6. Fog
 
-### Depth & Height Fog (Environment)
+Three layers: depth/height fog set on `WorldEnvironment.environment` (cheap, all renderers), volumetric fog (Forward+ only — godrays through depth), and `FogVolume` nodes for localized fog effects (interior rooms, pits, atmospheric volumes).
 
-Simple fog configured on the Environment resource:
-
-#### GDScript
-
-```gdscript
-var env: Environment = $WorldEnvironment.environment
-
-# Depth fog — increases with distance from camera
-env.fog_enabled = true
-env.fog_light_color = Color(0.7, 0.75, 0.8)
-env.fog_density = 0.01
-
-# Height fog — thicker below a certain Y level
-env.fog_height = 0.0
-env.fog_height_density = 0.5
-
-# Sun scattering — tints fog with directional light color
-env.fog_sun_scatter = 0.3
-```
-
-#### C#
-
-```csharp
-var env = GetNode<WorldEnvironment>("WorldEnvironment").Environment;
-env.FogEnabled = true;
-env.FogLightColor = new Color(0.7f, 0.75f, 0.8f);
-env.FogDensity = 0.01f;
-env.FogHeight = 0.0f;
-env.FogHeightDensity = 0.5f;
-env.FogSunScatter = 0.3f;
-```
-
-### Volumetric Fog (Forward+ only)
-
-Realistic fog that interacts with lights and casts volumetric shadows.
-
-Enable on the Environment:
-
-```gdscript
-env.volumetric_fog_enabled = true
-env.volumetric_fog_density = 0.05
-env.volumetric_fog_albedo = Color(0.9, 0.9, 0.9)
-env.volumetric_fog_emission = Color(0.0, 0.0, 0.0)
-env.volumetric_fog_length = 64.0
-env.volumetric_fog_temporal_reprojection_enabled = true
-```
-
-```csharp
-var env = GetNode<WorldEnvironment>("WorldEnvironment").Environment;
-env.VolumetricFogEnabled = true;
-env.VolumetricFogDensity = 0.05f;
-env.VolumetricFogAlbedo = new Color(0.9f, 0.9f, 0.9f);
-env.VolumetricFogEmission = new Color(0.0f, 0.0f, 0.0f);
-env.VolumetricFogLength = 64.0f;
-env.VolumetricFogTemporalReprojectionEnabled = true;
-```
-
-### FogVolume (Localized Fog)
-
-Create fog in specific areas (caves, steam vents, magic effects):
-
-```
-Scene
-├── WorldEnvironment (volumetric_fog_enabled = true, density = 0.0)
-└── FogVolume
-    shape = Box
-    size = Vector3(5, 3, 5)
-    material = FogMaterial (density = 1.0)
-```
-
-```gdscript
-func create_fog_cloud(pos: Vector3) -> void:
-    var fog := FogVolume.new()
-    fog.shape = RenderingServer.FOG_VOLUME_SHAPE_ELLIPSOID
-    fog.size = Vector3(4.0, 2.0, 4.0)
-    fog.position = pos
-
-    var mat := FogMaterial.new()
-    mat.density = 0.5
-    mat.albedo = Color(0.8, 0.85, 0.9)
-    fog.material = mat
-
-    add_child(fog)
-```
-
-```csharp
-public void CreateFogCloud(Vector3 pos)
-{
-    var fog = new FogVolume();
-    fog.Shape = RenderingServer.FogVolumeShape.Ellipsoid;
-    fog.Size = new Vector3(4.0f, 2.0f, 4.0f);
-    fog.Position = pos;
-
-    var mat = new FogMaterial();
-    mat.Density = 0.5f;
-    mat.Albedo = new Color(0.8f, 0.85f, 0.9f);
-    fog.Material = mat;
-
-    AddChild(fog);
-}
-```
-
-> Set global `volumetric_fog_density` to 0.0 and use FogVolume nodes to place fog only where needed. This gives full control without blanket fog everywhere.
-
----
+> See [references/fog-recipes.md](references/fog-recipes.md) for the full GDScript and C# recipes — depth/height fog setup, volumetric fog parameters and performance notes, and FogVolume placement.
 
 ## 7. Decals
 
-Decals project textures onto surfaces without modifying the underlying mesh. Use for bullet holes, blood splatters, footprints, ground markings.
+`Decal` nodes project a texture onto whatever surfaces fall within their bounding box — bullet holes, blood splatter, ground details, signage. All renderers support decals; performance scales with overdraw and decal count.
 
-### Scene Setup
-
-```
-World
-├── MeshInstance3D (floor)
-└── Decal
-    size = Vector3(1, 0.5, 1)   ← Y controls projection depth
-    texture_albedo = footprint.png
-    texture_normal = footprint_normal.png
-```
-
-### Spawning Decals from Code
-
-#### GDScript
-
-```gdscript
-func spawn_bullet_hole(hit_pos: Vector3, hit_normal: Vector3) -> void:
-    var decal := Decal.new()
-    decal.size = Vector3(0.3, 0.2, 0.3)
-    decal.texture_albedo = preload("res://textures/bullet_hole.png")
-    decal.position = hit_pos
-
-    # Orient decal to project along the hit surface normal
-    # Decals project along -Y, so rotate to align -Y with -hit_normal
-    if hit_normal.abs() != Vector3.UP:
-        decal.look_at(hit_pos - hit_normal, Vector3.UP)
-        decal.rotate_object_local(Vector3.RIGHT, PI / 2.0)
-    # For floor/ceiling hits (normal is UP or DOWN), default orientation works
-
-    # Fade and cleanup
-    decal.distance_fade_enabled = true
-    decal.distance_fade_begin = 20.0
-    decal.distance_fade_length = 5.0
-
-    get_parent().add_child(decal)
-
-    # Remove after 30 seconds
-    get_tree().create_timer(30.0).timeout.connect(decal.queue_free)
-```
-
-#### C#
-
-```csharp
-public void SpawnBulletHole(Vector3 hitPos, Vector3 hitNormal)
-{
-    var decal = new Decal();
-    decal.Size = new Vector3(0.3f, 0.2f, 0.3f);
-    decal.TextureAlbedo = GD.Load<Texture2D>("res://textures/bullet_hole.png");
-    decal.Position = hitPos;
-
-    if (hitNormal.Abs() != Vector3.Up)
-    {
-        decal.LookAt(hitPos - hitNormal, Vector3.Up);
-        decal.RotateObjectLocal(Vector3.Right, Mathf.Pi / 2.0f);
-    }
-
-    decal.DistanceFadeEnabled = true;
-    decal.DistanceFadeBegin = 20.0f;
-    decal.DistanceFadeLength = 5.0f;
-
-    GetParent().AddChild(decal);
-
-    GetTree().CreateTimer(30.0f).Timeout += decal.QueueFree;
-}
-```
-
-### Decal Limits
-
-| Renderer     | Max Decals                              |
-|--------------|-----------------------------------------|
-| Forward+     | 512 clustered elements (shared with lights, probes) |
-| Mobile       | 8 per mesh resource                     |
-| Compatibility | Limited by max renderable elements     |
+> See [references/decals.md](references/decals.md) for the scene setup, runtime spawning recipe (GDScript + C#), and the per-renderer decal limits.
 
 ---
 
 ## 8. Optimization — LOD, Culling, MultiMesh
 
-### Mesh LOD (Automatic)
+Four tools: automatic mesh LOD (set on import or per `MeshInstance3D`), manual `VisibilityRange` for staged swaps, occlusion culling via `OccluderInstance3D`, and `MultiMeshInstance3D` for thousands of identical meshes in one draw call.
 
-Godot auto-generates LOD levels on import for glTF, Blend, Collada, and FBX files. No manual setup needed.
-
-Control LOD aggressiveness:
-
-```gdscript
-# Per-object LOD bias (GeometryInstance3D property)
-# > 1.0 = keep high detail longer, < 1.0 = switch to low detail sooner
-$MeshInstance3D.lod_bias = 1.5
-```
-
-```csharp
-GetNode<MeshInstance3D>("MeshInstance3D").LodBias = 1.5f;
-```
-
-Global LOD threshold: **Project Settings > Rendering > Mesh LOD > LOD Change > Threshold Pixels** (default 1.0 — perceptually lossless).
-
-### Visibility Ranges (Manual LOD)
-
-For custom LOD with different meshes at different distances:
-
-```gdscript
-# Close-up: full-detail tree (0–30m)
-$TreeDetailed.visibility_range_begin = 0.0
-$TreeDetailed.visibility_range_end = 30.0
-$TreeDetailed.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-
-# Far: billboard impostor (25–100m, with crossfade overlap)
-$TreeBillboard.visibility_range_begin = 25.0
-$TreeBillboard.visibility_range_end = 100.0
-$TreeBillboard.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-```
-
-### Occlusion Culling
-
-Prevents rendering objects hidden behind walls/large geometry.
-
-**Setup:**
-1. Enable: **Project Settings > Rendering > Occlusion Culling > Use Occlusion Culling**
-2. Add an **OccluderInstance3D** node to your scene
-3. Select it → click **Bake Occluders** in the 3D toolbar
-4. Exclude dynamic objects via **Bake > Cull Mask** (assign them to different visual layers)
-
-> Only bake occluders from static geometry. Moving OccluderInstance3D nodes at runtime forces expensive BVH rebuilds.
-
-### MultiMeshInstance3D
-
-Render thousands of identical meshes (grass, trees, debris) in a single draw call.
-
-#### GDScript
-
-```gdscript
-func spawn_grass(positions: PackedVector3Array) -> void:
-    var mm := MultiMesh.new()
-    mm.transform_format = MultiMesh.TRANSFORM_3D
-    mm.mesh = preload("res://meshes/grass_blade.tres")
-    mm.instance_count = positions.size()
-
-    for i in positions.size():
-        var xform := Transform3D()
-        xform.origin = positions[i]
-        # Random rotation around Y
-        xform = xform.rotated(Vector3.UP, randf() * TAU)
-        # Random scale variation
-        var s := randf_range(0.8, 1.2)
-        xform = xform.scaled(Vector3(s, s, s))
-        mm.set_instance_transform(i, xform)
-
-    var mmi := MultiMeshInstance3D.new()
-    mmi.multimesh = mm
-    add_child(mmi)
-```
-
-#### C#
-
-```csharp
-public void SpawnGrass(Vector3[] positions)
-{
-    var mm = new MultiMesh();
-    mm.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-    mm.Mesh = GD.Load<Mesh>("res://meshes/grass_blade.tres");
-    mm.InstanceCount = positions.Length;
-
-    for (int i = 0; i < positions.Length; i++)
-    {
-        var xform = Transform3D.Identity;
-        xform.Origin = positions[i];
-        xform = xform.Rotated(Vector3.Up, (float)GD.RandRange(0, Mathf.Tau));
-        float s = (float)GD.RandRange(0.8, 1.2);
-        xform = xform.Scaled(new Vector3(s, s, s));
-        mm.SetInstanceTransform(i, xform);
-    }
-
-    var mmi = new MultiMeshInstance3D();
-    mmi.Multimesh = mm;
-    AddChild(mmi);
-}
-```
-
----
+> See [references/lod-and-culling.md](references/lod-and-culling.md) for setup recipes for each tool plus the MultiMesh runtime population example.
 
 ## 9. Renderer Comparison
 
-| Feature                | Forward+          | Mobile            | Compatibility     |
-|------------------------|-------------------|-------------------|-------------------|
-| SSAO / SSIL / SSR      | Yes               | No                | No                 |
-| Volumetric Fog          | Yes               | No                | No                |
-| SDFGI                   | Yes               | No                | No                |
-| LightmapGI              | Yes               | Yes               | Yes               |
-| VoxelGI                  | Yes               | No                | No                |
-| Glow / Bloom            | Yes               | Yes               | Yes               |
-| Max Omni+Spot per mesh  | 512 clustered     | 8+8               | 8+8 (adjustable)  |
-| Target Hardware         | Desktop/Console   | Mobile/Mid-range  | Low-end/WebGL     |
+| Feature | Forward+ | Mobile | Compatibility |
+|---|---|---|---|
+| SSAO / SSIL / SSR / Volumetric Fog / SDFGI / VoxelGI | Yes | No | No |
+| LightmapGI / Glow / Bloom | Yes | Yes | Yes |
+| Max Omni+Spot per mesh | 512 clustered | 8+8 | 8+8 (adjustable) |
+| Target | Desktop/Console | Mobile/Mid-range | Low-end/WebGL |
 
-Choose in **Project Settings > Rendering > Renderer > Rendering Method**.
-
-> **Rule of thumb:** Start with Forward+ for desktop. Switch to Mobile for mobile targets. Use Compatibility only for web or very low-end hardware.
+Choose in **Project Settings → Rendering → Renderer → Rendering Method**. Rule of thumb: Forward+ for desktop, Mobile for mobile, Compatibility only for web or very low-end hardware.
 
 ---
 
