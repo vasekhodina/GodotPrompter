@@ -51,6 +51,21 @@ Plus the new **`gdscript-advanced`** skill ships with 3 references at 9.8 KB SKI
 
 Validator: 56 → 42 warnings (10 token-budget closures + 4 incidental C# parity closures as sections moved to references along with their already-paired C# blocks).
 
+## v1.7.3 progress (2026-05-07) — initiative complete
+
+The final 4 over-budget skills restructured to Pattern X. **Every SKILL.md in the repo is now ≤ 16 KB.**
+
+| Skill | Before | After | Reference files |
+|---|---:|---:|---:|
+| `state-machine` | 17.9 KB | 13.4 KB | 1 |
+| `export-pipeline` | 17.7 KB | 13.9 KB | 2 |
+| `godot-brainstorming` | 17.6 KB | 14.1 KB | 1 |
+| `event-bus` | 16.8 KB | 14.7 KB | 1 |
+
+Validator: 22 → 17 warnings (4 token-budget closures + 1 incidental parity closure as the event-bus testing section moved to references).
+
+**v1.7.x token-budget initiative complete.** 35 skills restructured across v1.7.0–v1.7.3. No skills remain in the deferred list.
+
 ## v1.7.2 progress (2026-05-07)
 
 10 more skills restructured to Pattern X (next 10 heaviest from the v1.7.1 deferred list):
@@ -70,14 +85,9 @@ Validator: 56 → 42 warnings (10 token-budget closures + 4 incidental C# parity
 
 Validator: 42 → 22 warnings (10 token-budget closures + 10 incidental parity closures as sections moved to references along with their already-paired C# blocks, including 4 from gdscript-patterns moving accepted-warning sections into references).
 
-## Deferred (count: 4)
+## Deferred (count: 0)
 
-Listed largest-first. v1.7.3 (or later) closes these.
-
-- `skills/state-machine/SKILL.md` (~18 KB) — node-based vs resource-based deep dives → `references/`
-- `skills/export-pipeline/SKILL.md` (~18 KB) — per-platform export deep dives, CI recipes → `references/`
-- `skills/godot-brainstorming/SKILL.md` (~17 KB) — process skill; consider whether the recipe section can move to `references/`
-- `skills/event-bus/SKILL.md` (~17 KB) — typed signal patterns, testing recipes → `references/`
+The deferred list is empty as of v1.7.3. The token-budget initiative is complete — every SKILL.md is at or below the 16 KB budget.
 
 ## Accepted
 

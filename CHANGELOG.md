@@ -4,6 +4,20 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.3] - 2026-05-07
+
+### Changed
+
+- **v1.7.x token-budget initiative complete.** Final 4 over-budget skills restructured to **Pattern X** (core SKILL.md + `references/<topic>.md`):
+  - `state-machine` (17.9 → 13.4 KB) — 1 reference: hierarchical-and-parallel
+  - `export-pipeline` (17.7 → 13.9 KB) — 2 references: ci-cd-github-actions, distribution-itch-steam
+  - `godot-brainstorming` (17.6 → 14.1 KB) — 1 reference: example-chest (worked Chest example + Design Output Format)
+  - `event-bus` (16.8 → 14.7 KB) — 1 reference: testing
+- 5 new reference files created across the 4 restructured skills
+- `docs/superpowers/notes/2026-05-06-token-budget-debt.md` — 4 → 0 deferred skills; v1.7.3 progress block added; initiative marked complete
+
+> **Release notes:** Validator baseline at release: 0 errors, 17 warnings (8 deferred C# parity + 9 accepted GDScript-only + 0 token-budget). Down from 22 in v1.7.2. **Token-budget warnings closed: 4 → 0.** Every SKILL.md in the repo is now ≤ 16 KB; the v1.7.0 token-budget initiative spanning v1.7.0–v1.7.3 is complete (35 skills restructured, 0 over budget). No new agents, no new skills — pure token-budget patch release closing the queue. Repo-wide minimum stays at Godot 4.3+.
+
 ## [1.7.2] - 2026-05-07
 
 ### Changed
