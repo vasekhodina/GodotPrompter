@@ -99,13 +99,23 @@ When publishing a new version (e.g., v1.4.1):
    node scripts/count-tokens.mjs --tokenizer --markdown
    ```
    Replace the contents between the `<!-- BEGIN-TOKEN-TABLE -->` / `<!-- END-TOKEN-TABLE -->` markers in `docs/token-budget.md` with the new output. Commit alongside the version bump.
-3. **Update version** in these files:
-   - `.claude-plugin/plugin.json` → `"version": "1.4.1"`
+3. **Bump version across all manifests** using the helper script:
+   ```bash
+   node scripts/bump-version.mjs 1.4.1
+   ```
+   This updates all five in-repo manifests in one shot, plus the two sibling marketplaces (`skillsmith` and `godot-prompter-marketplace`) when present:
    - `package.json` → `"version": "1.4.1"`
-   - `CHANGELOG.md` → add `## [1.4.1]` section
+   - `.claude-plugin/plugin.json` → `"version": "1.4.1"`
+   - `.claude-plugin/marketplace.json` → `"version": "1.4.1"`
+   - `.cursor-plugin/plugin.json` → `"version": "1.4.1"`
+   - `gemini-extension.json` → `"version": "1.4.1"`
+   - `D:/AI/skillsmith/.claude-plugin/marketplace.json` (sibling, primary)
+   - `D:/Godot/godot-prompter-marketplace/.claude-plugin/marketplace.json` (sibling, legacy)
+
+   Then add the `## [1.4.1]` section to `CHANGELOG.md` by hand.
 4. **Commit and tag:**
    ```bash
-   git add .claude-plugin/plugin.json package.json CHANGELOG.md
+   git add -A
    git commit -m "chore: bump version to 1.4.1"
    git tag -a v1.4.1 -m "v1.4.1 — description of changes"
    git push origin master --tags

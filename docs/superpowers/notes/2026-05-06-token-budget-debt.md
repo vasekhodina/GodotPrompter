@@ -51,21 +51,6 @@ Plus the new **`gdscript-advanced`** skill ships with 3 references at 9.8 KB SKI
 
 Validator: 56 → 42 warnings (10 token-budget closures + 4 incidental C# parity closures as sections moved to references along with their already-paired C# blocks).
 
-## v1.7.3 progress (2026-05-07) — initiative complete
-
-The final 4 over-budget skills restructured to Pattern X. **Every SKILL.md in the repo is now ≤ 16 KB.**
-
-| Skill | Before | After | Reference files |
-|---|---:|---:|---:|
-| `state-machine` | 17.9 KB | 13.4 KB | 1 |
-| `export-pipeline` | 17.7 KB | 13.9 KB | 2 |
-| `godot-brainstorming` | 17.6 KB | 14.1 KB | 1 |
-| `event-bus` | 16.8 KB | 14.7 KB | 1 |
-
-Validator: 22 → 17 warnings (4 token-budget closures + 1 incidental parity closure as the event-bus testing section moved to references).
-
-**v1.7.x token-budget initiative complete.** 35 skills restructured across v1.7.0–v1.7.3. No skills remain in the deferred list.
-
 ## v1.7.2 progress (2026-05-07)
 
 10 more skills restructured to Pattern X (next 10 heaviest from the v1.7.1 deferred list):
@@ -84,6 +69,21 @@ Validator: 22 → 17 warnings (4 token-budget closures + 1 incidental parity clo
 | `math-essentials` | 18 KB | 12.4 KB | 3 |
 
 Validator: 42 → 22 warnings (10 token-budget closures + 10 incidental parity closures as sections moved to references along with their already-paired C# blocks, including 4 from gdscript-patterns moving accepted-warning sections into references).
+
+## v1.7.3 progress (2026-05-07) — initiative complete
+
+The final 4 over-budget skills restructured to Pattern X. **Every SKILL.md in the repo is now ≤ 16 KB.**
+
+| Skill | Before | After | Reference files |
+|---|---:|---:|---:|
+| `state-machine` | 17.9 KB | 13.4 KB | 1 |
+| `export-pipeline` | 17.7 KB | 13.9 KB | 2 |
+| `godot-brainstorming` | 17.6 KB | 14.1 KB | 1 |
+| `event-bus` | 16.8 KB | 14.7 KB | 1 |
+
+Validator: 22 → 17 warnings (4 token-budget closures + 1 incidental parity closure as the event-bus testing section moved to references).
+
+**v1.7.x token-budget initiative complete.** 35 skills restructured across v1.7.0–v1.7.3. No skills remain in the deferred list.
 
 ## Deferred (count: 0)
 
