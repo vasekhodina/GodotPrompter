@@ -244,13 +244,39 @@ GodotPrompter includes 9 specialized agents:
 
 ## Validation
 
-Skills were validated against a real Godot 4.3+ trial project (top-down 2D action RPG):
+Quality is enforced by an automated validator that runs on every release tag. Human-readable run:
 
-- **13/15 skills PASS** — guidance worked as documented
-- **2/15 skills PARTIAL** — minor gotchas documented and fixed
-- **0/15 skills FAIL**
+```bash
+node scripts/validate-skills.mjs           # exit 1 on errors, 0 otherwise
+node scripts/validate-skills.mjs --json    # machine-readable for CI
+```
 
-See `tests/trial-project/VALIDATION.md` for detailed results.
+The validator (`scripts/validate-skills.mjs`) checks every `skills/*/SKILL.md` and `agents/*.md` against these rules:
+
+| Rule | What it checks | Severity |
+|---|---|---|
+| `frontmatter-{missing,name-missing,description-missing,name-mismatch}` | YAML frontmatter is present and `name` matches folder | error |
+| `cross-ref-broken` | Every skill referenced on the `**Related skills:**` line and inline `see <skill> skill` mentions resolves to an existing skill folder | error |
+| `agent-skill-path-broken` | Every `skills/<name>/SKILL.md` path inside an agent definition exists | error |
+| `related-skills-line-missing` | Skill has a `**Related skills:**` line between H1 and first section | warning |
+| `csharp-parity-missing` / `csharp-parity-accepted` | Every section with a GDScript code block also has a C# block (skills allowlisted as GDScript-only-by-design emit `accepted` instead of `missing`) | warning |
+| `checklist-missing` | Implementation checklist (`- [ ]` items) present near end of file | warning |
+| `token-budget-exceeded` | `SKILL.md` ≤ 16 KB (references under `skills/<name>/references/` are unrestricted) | warning |
+| `orphan-reference` | Every `references/*.md` file is linked from its parent `SKILL.md` | warning |
+
+Token cost reporting:
+
+```bash
+node scripts/count-tokens.mjs --tokenizer --markdown
+```
+
+Produces a per-skill / per-agent table (bytes, KB, estimated tokens, Claude / GPT tokenizer counts, status) that lives between `<!-- BEGIN-TOKEN-TABLE -->` markers in [`docs/token-budget.md`](docs/token-budget.md).
+
+CI gate: `.github/workflows/release.yml` runs both `node scripts/validate-skills.mjs` and a tag-vs-manifest version-consistency check on every `v*.*.*` push. The release is blocked if the validator returns errors or any of `package.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` drifts from the tag.
+
+**Current baseline (v1.7.3):** 0 errors, 17 warnings (8 deferred C# parity, 9 accepted GDScript-only, 0 token-budget). Every `SKILL.md` is at or below the 16 KB budget after the v1.7.x token-budget initiative.
+
+A manual agent-integration test plan covering full workflows (skill discovery, cross-reference navigation, end-to-end feature implementation) lives in [`tests/agent-integration/TEST_PLAN.md`](tests/agent-integration/TEST_PLAN.md) for spot-checks against new agent versions or platforms.
 
 ## Contributing
 
