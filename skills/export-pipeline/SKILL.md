@@ -140,83 +140,9 @@ godot --headless --export-pack "Windows Desktop" build/windows/MyGame.pck
 
 ## 4. CI/CD with GitHub Actions
 
-Full workflow exporting Windows (.exe), Linux (.x86_64), and Web (.html) builds on every push to `main` and on tagged releases.
+Run `godot --headless --export-release` inside a GitHub Actions matrix that builds Windows, Linux, and Web artifacts on every push and tagged release. Use [`chickensoft-games/setup-godot@v2`](https://github.com/chickensoft-games/setup-godot) to install the engine + export templates (set `use-dotnet: true` for C# projects). Inject the version from `git describe` before export so `application/config/version` is correct in the binary.
 
-```yaml
-# .github/workflows/export.yml
-name: Export Godot Game
-
-on:
-  push:
-    branches: [main]
-  release:
-    types: [published]
-
-env:
-  GODOT_VERSION: "4.3"
-  EXPORT_NAME: "MyGame"
-
-jobs:
-  export:
-    name: Export — ${{ matrix.preset }}
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - preset: "Windows Desktop"
-            artifact: windows
-            output_path: build/windows/MyGame.exe
-
-          - preset: "Linux/X11"
-            artifact: linux
-            output_path: build/linux/MyGame.x86_64
-
-          - preset: "Web"
-            artifact: web
-            output_path: build/web/index.html
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # needed for git describe (versioning)
-
-      - name: Set up Godot ${{ env.GODOT_VERSION }}
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: ${{ env.GODOT_VERSION }}
-          use-dotnet: false   # set true for C# projects
-          include-templates: true
-
-      - name: Create output directory
-        run: mkdir -p $(dirname ${{ matrix.output_path }})
-
-      - name: Inject version from git tag
-        run: |
-          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "0.0.0-dev")
-          echo "GAME_VERSION=$VERSION" >> $GITHUB_ENV
-          # Patch project.godot so ProjectSettings.get_setting("application/config/version") returns it
-          sed -i "s/^config\/version=.*/config\/version=\"$VERSION\"/" project.godot || true
-
-      - name: Export — ${{ matrix.preset }}
-        run: |
-          godot --headless --export-release "${{ matrix.preset }}" "${{ matrix.output_path }}"
-
-      - name: Mark Linux binary executable
-        if: matrix.artifact == 'linux'
-        run: chmod +x ${{ matrix.output_path }}
-
-      - name: Upload artifact — ${{ matrix.artifact }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.EXPORT_NAME }}-${{ matrix.artifact }}-${{ env.GAME_VERSION }}
-          path: build/${{ matrix.artifact }}/
-          if-no-files-found: error
-```
-
-> For C# (Mono) projects set `use-dotnet: true` in the `setup-godot` step. The action will install the .NET SDK automatically.
+See [references/ci-cd-github-actions.md](references/ci-cd-github-actions.md) for the full `.github/workflows/export.yml` with matrix presets, artifact upload, and Linux executable bit handling.
 
 ---
 
@@ -285,93 +211,17 @@ Use [Semantic Versioning](https://semver.org/) tags: `v1.2.3`. `git describe` th
 
 ---
 
-## 6. itch.io Deployment
+## 6. Distribution: itch.io and Steam
 
-[Butler](https://itch.io/docs/butler/) is the official itch.io CLI for pushing builds.
+**itch.io** uses the [Butler](https://itch.io/docs/butler/) CLI: `butler push build/windows/ my-studio/my-game:windows --userversion "$VERSION"`. Channel names follow a convention (`windows`, `linux`, `macos`, `web`, `android`). In CI, the [`Ayowel/butler-to-itch@v1`](https://github.com/Ayowel/butler-to-itch) action pushes all artifacts at once; store the API key as the `BUTLER_API_KEY` secret.
 
-### Install Butler
+**Steam** requires three pieces: the Steamworks SDK (non-redistributable, keep out of public repos), the [GodotSteam](https://godotsteam.com/) addon for engine bindings, and depot configurations driven by `steamcmd +run_app_build app_build.vdf`. Steam integration is outside the export pipeline itself.
 
-```bash
-# Linux/macOS
-curl -L https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -o butler.zip
-unzip butler.zip
-chmod +x butler
-
-# Or install via GitHub Actions:
-# uses: Ayowel/butler-to-itch@v1
-```
-
-### Push a Build
-
-```bash
-butler push build/windows/ my-studio/my-game:windows
-butler push build/linux/   my-studio/my-game:linux
-butler push build/web/     my-studio/my-game:web
-```
-
-### Channel Naming Convention
-
-| Channel name | Platform |
-|---|---|
-| `windows` | Windows 64-bit |
-| `linux` | Linux 64-bit |
-| `macos` | macOS universal |
-| `web` | HTML5 / WebGL |
-| `android` | Android APK/AAB |
-
-Use `--userversion` to tag the build with your version string:
-
-```bash
-butler push build/windows/ my-studio/my-game:windows --userversion "$GAME_VERSION"
-```
-
-### GitHub Actions — Deploy to itch.io
-
-Add this job after the export job to push all artifacts to itch.io:
-
-```yaml
-  deploy-itch:
-    name: Deploy to itch.io
-    needs: export
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    steps:
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-
-      - name: Push to itch.io
-        uses: Ayowel/butler-to-itch@v1
-        with:
-          butler_key: ${{ secrets.BUTLER_API_KEY }}
-          itch_user: my-studio
-          itch_game: my-game
-          version: ${{ github.ref_name }}
-          files: |
-            windows:artifacts/${{ env.EXPORT_NAME }}-windows-*/
-            linux:artifacts/${{ env.EXPORT_NAME }}-linux-*/
-            web:artifacts/${{ env.EXPORT_NAME }}-web-*/
-```
-
-Store your butler API key (from <https://itch.io/user/settings/api-keys>) as a GitHub Actions secret named `BUTLER_API_KEY`.
+See [references/distribution-itch-steam.md](references/distribution-itch-steam.md) for full butler install instructions, channel naming table, the `deploy-itch` GitHub Actions job, and the Steam component breakdown.
 
 ---
 
-## 7. Steam Deployment
-
-For Steam distribution you need three components working together:
-
-- **Steamworks SDK**: Download from the Steamworks partner site. It is not redistributable — do not commit it to a public repo. Reference it via a local path or a private artifact store in CI.
-- **GodotSteam addon**: [GodotSteam](https://godotsteam.com/) is a community addon that wraps the Steamworks C++ SDK for use in GDScript and C#. It provides `Steam.init()`, achievements, stats, UGC, and networking. Install it as a Godot plugin; follow the GodotSteam docs for the exact version matching your Godot and Steamworks SDK versions.
-- **Depot configuration**: In Steamworks Partner, define one depot per platform (Windows, Linux, macOS). Each depot maps to a set of files from your export output. The `steamcmd` CLI uploads depots to Steam using `app_build` scripts. Builds are staged in a local `content/` folder and pushed with `steamcmd +run_app_build app_build.vdf`.
-
-Steam integration is outside the scope of the export pipeline itself — refer to the GodotSteam documentation and Steamworks SDK guides for full setup.
-
----
-
-## 8. Shader Baker (Godot 4.5+)
+## 7. Shader Baker (Godot 4.5+)
 
 Godot 4.5 introduces the **Shader Baker**, an export-time tool that pre-compiles shaders for the target platform. Without it, shaders compile at runtime on first use, causing visible hitches when new materials are first rendered in-game. The Shader Baker eliminates this stutter by doing the work at export time.
 
@@ -401,7 +251,7 @@ godot --headless --export-release "Windows Desktop" build/windows/MyGame.exe
 
 ---
 
-## 9. Windows Export — Native Resource Editing (Godot 4.5+)
+## 8. Windows Export — Native Resource Editing (Godot 4.5+)
 
 Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, company name) on Windows required the external `rcedit` tool. Godot 4.5 handles all of this natively at export time — no `rcedit` download or configuration needed.
 
@@ -427,7 +277,7 @@ Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, comp
 
 ---
 
-## 10. Checklist
+## 9. Checklist
 
 - [ ] Export templates downloaded for the target Godot version (Editor → Export Templates)
 - [ ] `export_presets.cfg` committed to version control
