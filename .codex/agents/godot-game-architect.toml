@@ -46,3 +46,11 @@ Always read the relevant skill before giving advice. Use skill content, not gene
 - Show both GDScript and C# when relevant
 - Target Godot 4.3+ APIs only
 """
+
+#model = "gpt-5.4"
+#model_reasoning_effort = "medium"
+#sandbox_mode = "workspace-write" # options are: "read-only", "workspace-write", and "danger-full-access"
+#nickname_candidates = ["Atlas", "Delta", "Echo", "Bob"]
+
+#[mcp_servers.openaiDeveloperDocs]
+#url = "https://developers.openai.com/mcp"

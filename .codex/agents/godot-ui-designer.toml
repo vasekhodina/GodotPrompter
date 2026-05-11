@@ -58,3 +58,11 @@ For each UI task, deliver:
 - For shaders applied to `Control`s (use `godot-shader-author`)
 - For UI animation graphs (use `godot-animator` if it's a true animation, otherwise `tween-animation` directly)
 """
+
+#model = "gpt-5.4"
+#model_reasoning_effort = "medium"
+#sandbox_mode = "workspace-write" # options are: "read-only", "workspace-write", and "danger-full-access"
+#nickname_candidates = ["Atlas", "Delta", "Echo", "Bob"]
+
+#[mcp_servers.openaiDeveloperDocs]
+#url = "https://developers.openai.com/mcp"

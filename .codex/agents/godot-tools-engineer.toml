@@ -62,3 +62,11 @@ For each tools task, deliver:
 - Performance diagnosis of the editor itself → use `godot-performance-profiler`
 - C++ GDExtension authoring → out of scope; deferred to v1.8 (or use `godot-csharp-engineer` if a C# alternative works)
 """
+
+#model = "gpt-5.4"
+#model_reasoning_effort = "medium"
+#sandbox_mode = "workspace-write" # options are: "read-only", "workspace-write", and "danger-full-access"
+#nickname_candidates = ["Atlas", "Delta", "Echo", "Bob"]
+
+#[mcp_servers.openaiDeveloperDocs]
+#url = "https://developers.openai.com/mcp"
