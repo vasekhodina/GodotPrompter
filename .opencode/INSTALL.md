@@ -22,7 +22,7 @@ Verify by typing `/skills` into the OpenCode prompt
 
 ## Usage
 
-Use OpenCode's native `/skills` tool:
+Use OpenCode's `/skills` command:
 
 ```
 /skills # This will bring-out a menu listing all available skills with short description
